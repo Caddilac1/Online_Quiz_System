@@ -176,3 +176,13 @@ JAZZMIN_SETTINGS = {
 
 DEFAULT_FROM_EMAIL = 'nabaradirector@gmail.com'
 ADMIN_EMAIL = 'nabaradirector@gmail.com'
+
+
+EMAIL_HOST=smtp.gmail.com
+EMAIL_HOST_USER=nabaradirector@gmail.com
+EMAIL_HOST_PASSWORD=scib immc oqdy ghnu
+EMAIL_PORT=465
+EMAIL_USE_TLS=False
+EMAIL_USE_SSL=True
+DEFAULT_FROM_EMAIL=nabaradirector@gmail.com
+SECRET_KEY=django-insecure-$-(^odz!gviyr447k6b2vpyl6xn_e!rwho@dea9hsfs$(zea5f

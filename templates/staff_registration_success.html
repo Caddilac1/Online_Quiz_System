@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Registration Submitted</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f4f8fc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background-color: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 500px;
+      width: 90%;
+    }
+
+    .container h2 {
+      color: #2c3e50;
+      margin-bottom: 15px;
+    }
+
+    .container p {
+      color: #555;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .email {
+      font-weight: 600;
+      color: #2980b9;
+    }
+
+    .back-link {
+      margin-top: 20px;
+      display: inline-block;
+      text-decoration: none;
+      color: #2980b9;
+      border: 1px solid #2980b9;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: background-color 0.3s;
+    }
+
+    .back-link:hover {
+      background-color: #2980b9;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Registration Submitted ✅</h2>
+    <p>Thank you for registering, <span class="email">{{ email }}</span>.</p>
+    <p>Your account has been created and is pending approval by the administrator.</p>
+    <p>Please check your email for an activation link to verify your account.</p>
+    <a href="{% url 'login' %}" class="back-link">Back to Login</a>
+  </div>
+</body>
+</html>

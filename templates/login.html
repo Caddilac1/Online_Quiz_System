@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Sign In - Ghana Communication Technology University</title>
+    <link rel="stylesheet" href="{% static 'css/student_signin.css' %}">
+  </head>
+  <body>
+    <div class="university-logo">GCTU</div>
+    <h1 class="page-title">Student Sign In</h1>
+    <p class="subtitle">Ghana Communication Technology University</p>
+    
+    <div class="form-container">
+      <form id="signinForm" action="{% url 'login' %}" method="POST">
+        {% csrf_token %}
+
+        {% if messages %}
+          {% for message in messages %}
+            {% if message.tags == 'error' %}
+              <div class="alert alert-danger">
+            {% else %}
+              <div class="alert alert-{{ message.tags }}">
+            {% endif %}
+                {{ message }}
+              </div>
+          {% endfor %}
+        {% endif %}
+
+        <div class="form-group">
+          <label for="studentId">Student Index Number <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="text" id="studentId" name="username" placeholder="e.g. 1674557635" required autocomplete="username">
+            <div class="input-icon">🎓</div>
+          </div>
+          <div class="error-message" id="studentIdError">Please enter your student index number</div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+            <button type="button" class="password-toggle" onclick="togglePassword('password')">Show</button>
+          </div>
+          <div class="error-message" id="passwordError">Please enter your password</div>
+        </div>
+
+        <div class="form-options">
+          <label class="remember-me">
+            <input type="checkbox" name="remember_me">
+            <span class="checkmark"></span>
+            Remember me
+          </label>
+          <a href="#" class="forgot-password">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <div class="loading" id="loading"></div>
+          <span id="submitText">Sign In</span>
+        </button>
+        
+        <div class="signup-link">
+          Don't have an account? <a href="{% url 'register_student' %}">Register here</a>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      const inputs = {
+        studentId: document.getElementById('studentId'),
+        password: document.getElementById('password')
+      };
+
+      const errorMessages = {
+        studentId: document.getElementById('studentIdError'),
+        password: document.getElementById('passwordError')
+      };
+
+      // Basic validation on blur
+      Object.keys(inputs).forEach(key => {
+        inputs[key].addEventListener('blur', () => validateField(key));
+      });
+
+      function validateField(fieldName) {
+        const input = inputs[fieldName];
+        const errorElement = errorMessages[fieldName];
+        let isValid = true;
+
+        switch (fieldName) {
+          case 'studentId':
+            isValid = input.value.trim().length > 0;
+            break;
+          case 'password':
+            isValid = input.value.length > 0;
+            break;
+        }
+
+        if (isValid) {
+          input.style.borderColor = '#48bb78'; // green
+          errorElement.style.display = 'none';
+        } else if (input.value.length === 0 && document.activeElement !== input) {
+          input.style.borderColor = '#f56565'; // red
+          errorElement.style.display = 'block';
+        } else {
+          input.style.borderColor = '#e2e8f0'; // default
+          errorElement.style.display = 'none';
+        }
+      }
+
+      function togglePassword(fieldId) {
+        const input = document.getElementById(fieldId);
+        const button = input.nextElementSibling;
+
+        if (input.type === 'password') {
+          input.type = 'text';
+          button.textContent = 'Hide';
+        } else {
+          input.type = 'password';
+          button.textContent = 'Show';
+        }
+      }
+
+      // Loading state on form submission
+      document.getElementById('signinForm').addEventListener('submit', function() {
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+        const submitText = document.getElementById('submitText');
+        
+        submitBtn.disabled = true;
+        loading.style.display = 'block';
+        submitText.textContent = 'Signing in...';
+      });
+    </script>
+
+    <style>
+      /* Base styles similar to signup page */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .university-logo {
+        font-size: 3rem;
+        font-weight: bold;
+        color: white;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      }
+
+      .page-title {
+        color: white;
+        font-size: 2.5rem;
+        margin-bottom: 5px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+      }
+
+      .subtitle {
+        color: rgba(255,255,255,0.9);
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      .form-container {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 450px;
+      }
+
+      .alert {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 14px;
+      }
+
+      .alert-danger {
+        background-color: #fed7d7;
+        color: #c53030;
+        border: 1px solid #feb2b2;
+      }
+
+      .alert-success {
+        background-color: #c6f6d5;
+        color: #2f855a;
+        border: 1px solid #9ae6b4;
+      }
+
+      .form-group {
+        margin-bottom: 25px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 14px;
+      }
+
+      .required {
+        color: #e53e3e;
+      }
+
+      .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      input[type="text"], input[type="password"] {
+        width: 100%;
+        padding: 16px 50px 16px 16px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background-color: #f8fafc;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #667eea;
+        background-color: white;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .input-icon {
+        position: absolute;
+        right: 45px;
+        font-size: 18px;
+        color: #a0aec0;
+      }
+
+      .password-toggle {
+        position: absolute;
+        right: 12px;
+        background: none;
+        border: none;
+        color: #667eea;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+
+      .password-toggle:hover {
+        background-color: #f1f5f9;
+      }
+
+      .error-message {
+        color: #e53e3e;
+        font-size: 13px;
+        margin-top: 6px;
+        display: none;
+      }
+
+      .form-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+
+      .remember-me {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        font-size: 14px;
+        color: #4a5568;
+      }
+
+      .remember-me input[type="checkbox"] {
+        display: none;
+      }
+
+      .checkmark {
+        width: 18px;
+        height: 18px;
+        border: 2px solid #cbd5e0;
+        border-radius: 4px;
+        margin-right: 8px;
+        position: relative;
+        transition: all 0.2s;
+      }
+
+      .remember-me input[type="checkbox"]:checked + .checkmark {
+        background-color: #667eea;
+        border-color: #667eea;
+      }
+
+      .remember-me input[type="checkbox"]:checked + .checkmark::after {
+        content: '✓';
+        position: absolute;
+        color: white;
+        font-size: 12px;
+        top: -2px;
+        left: 2px;
+      }
+
+      .forgot-password {
+        color: #667eea;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+
+      .forgot-password:hover {
+        color: #5a67d8;
+        text-decoration: underline;
+      }
+
+      .submit-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 18px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 56px;
+      }
+
+      .submit-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+      }
+
+      .submit-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .loading {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+        margin-right: 10px;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      .signup-link {
+        text-align: center;
+        margin-top: 25px;
+        color: #718096;
+        font-size: 14px;
+      }
+
+      .signup-link a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s;
+      }
+
+      .signup-link a:hover {
+        color: #5a67d8;
+        text-decoration: underline;
+      }
+
+      @media (max-width: 480px) {
+        .form-container {
+          padding: 30px 20px;
+        }
+
+        .page-title {
+          font-size: 2rem;
+        }
+
+        .university-logo {
+          font-size: 2.5rem;
+        }
+
+        .form-options {
+          flex-direction: column;
+          gap: 15px;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </body>
+</html>

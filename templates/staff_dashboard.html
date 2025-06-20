@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Lecturer Dashboard{% endblock %}
+{% block content %}
+  <h2>Welcome, {{ request.user.get_full_name }}</h2>
+  <a href="." class="btn btn-primary mb-3">Create New Quiz</a>
+
+  <h4>Your Quizzes:</h4>
+  <ul>
+    {% for quiz in quizzes %}
+      <li>
+        <strong>{{ quiz.title }}</strong> ({{ quiz.course.code }})
+        <br>
+        Questions: {{ quiz.number_of_questions }} | Duration: {{ quiz.duration_minutes }} mins
+      </li>
+    {% empty %}
+      <li>You haven’t created any quizzes yet.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

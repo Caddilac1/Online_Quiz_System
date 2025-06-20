@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>New Staff Registration - Approval Needed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f6f9fc;
+            padding: 20px;
+            color: #333;
+        }
+
+        .email-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            color: #0a74da;
+        }
+
+        .info {
+            margin-top: 20px;
+        }
+
+        .info p {
+            margin: 8px 0;
+        }
+
+        .button {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 20px;
+            background-color: #0a74da;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <h2>🆕 New Staff Registration Alert</h2>
+
+        <p>Hello Admin,</p>
+        <p>A new staff member has registered and is awaiting your approval:</p>
+
+        <div class="info">
+            <p><strong>Full Name:</strong> {{ full_name }}</p>
+            <p><strong>Staff ID:</strong> {{ staff_id }}</p>
+            <p><strong>Email:</strong> {{ email }}</p>
+            <p><strong>Faculty:</strong> {{ faculty }}</p>
+            <p><strong>Department:</strong> {{ department }}</p>
+            <p><strong>Position:</strong> {{ position }}</p>
+        </div>
+
+        <p>Please review and verify this staff member’s information manually against the HR database.</p>
+
+        <a href="{{ http://127.0.0.1:8000/admin }}" class="button">Approve Staff in Admin Panel</a>
+
+        <div class="footer">
+            GCTU Staff Registration System<br>
+            Powered by {{ site_name }}
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Registration - Ghana Communication Technology University</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 50%, #2980b9 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px 15px;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      /* Ghana flag colors accent */
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(to right, #ce1126 0%, #ce1126 33%, #fcd116 33%, #fcd116 66%, #006b3f 66%, #006b3f 100%);
+        z-index: 1000;
+      }
+
+      .university-header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .university-logo {
+        width: 90px;
+        height: 90px;
+        background: linear-gradient(135deg, #34495e, #2c3e50);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-weight: 900;
+        font-size: 20px;
+        color: white;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        animation: pulse 2s ease-in-out infinite;
+        border: 3px solid rgba(255, 255, 255, 0.2);
+      }
+
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+
+      .page-title {
+        font-size: clamp(26px, 5vw, 38px);
+        color: white;
+        font-weight: 700;
+        margin-bottom: 8px;
+        text-align: center;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+        line-height: 1.2;
+      }
+
+      .staff-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #f39c12, #e67e22);
+        color: white;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+        box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+      }
+
+      .subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 16px;
+        text-align: center;
+        margin-bottom: 30px;
+        font-weight: 300;
+      }
+
+      .form-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        padding: 45px 40px;
+        border-radius: 24px;
+        box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
+        width: 100%;
+        max-width: 500px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        animation: slideInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        position: relative;
+      }
+
+      .form-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #3498db, #2980b9, #34495e);
+        border-radius: 24px 24px 0 0;
+      }
+
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(60px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .form-group {
+        margin-bottom: 26px;
+        position: relative;
+      }
+
+      label {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 10px;
+        color: #2c3e50;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .required {
+        color: #e74c3c;
+        margin-left: 2px;
+      }
+
+      .input-wrapper {
+        position: relative;
+      }
+
+      input[type="text"],
+      input[type="email"],
+      input[type="password"],
+      select {
+        width: 100%;
+        padding: 18px 22px;
+        border-radius: 12px;
+        border: 2px solid #bdc3c7;
+        background-color: #f8f9fa;
+        font-size: 16px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        outline: none;
+        font-family: inherit;
+      }
+
+      select {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 12px center;
+        background-repeat: no-repeat;
+        background-size: 16px;
+        padding-right: 40px;
+      }
+
+      input:focus,
+      select:focus {
+        border-color: #3498db;
+        background-color: white;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        transform: translateY(-2px);
+      }
+
+      input:valid:not(:focus) {
+        border-color: #27ae60;
+      }
+
+      input:invalid:not(:focus):not(:placeholder-shown) {
+        border-color: #e74c3c;
+      }
+
+      .input-icon {
+        position: absolute;
+        right: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 18px;
+        opacity: 0.6;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+      }
+
+      input:focus + .input-icon {
+        opacity: 0.9;
+      }
+
+      .password-toggle {
+        position: absolute;
+        right: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #7f8c8d;
+        font-size: 14px;
+        padding: 6px;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+      }
+
+      .password-toggle:hover {
+        color: #2c3e50;
+        background: rgba(52, 152, 219, 0.1);
+      }
+
+      .error-message {
+        color: #e74c3c;
+        font-size: 12px;
+        margin-top: 6px;
+        display: none;
+        animation: shake 0.3s ease-in-out;
+        font-weight: 500;
+      }
+
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-4px); }
+        75% { transform: translateX(4px); }
+      }
+
+      .password-strength {
+        margin-top: 10px;
+        height: 4px;
+        background: #ecf0f1;
+        border-radius: 2px;
+        overflow: hidden;
+        display: none;
+      }
+
+      .password-strength-fill {
+        height: 100%;
+        transition: all 0.3s ease;
+        border-radius: 2px;
+      }
+
+      .strength-weak { background: #e74c3c; width: 25%; }
+      .strength-fair { background: #f39c12; width: 50%; }
+      .strength-good { background: #f1c40f; width: 75%; }
+      .strength-strong { background: #27ae60; width: 100%; }
+
+      .staff-info {
+        background: linear-gradient(135deg, #ecf0f1, #d5dbdb);
+        padding: 16px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border-left: 4px solid #3498db;
+      }
+
+      .staff-info h3 {
+        color: #2c3e50;
+        font-size: 14px;
+        margin-bottom: 8px;
+        font-weight: 600;
+      }
+
+      .staff-info p {
+        color: #7f8c8d;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      .submit-btn {
+        width: 100%;
+        padding: 20px;
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 50%, #34495e 100%);
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 10px 30px rgba(52, 152, 219, 0.4);
+        position: relative;
+        overflow: hidden;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+      }
+
+      .submit-btn:hover::before {
+        left: 100%;
+      }
+
+      .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(52, 152, 219, 0.6);
+      }
+
+      .submit-btn:active {
+        transform: translateY(-1px);
+      }
+
+      .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .loading {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid transparent;
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 10px;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      .success-message {
+        display: none;
+        background: linear-gradient(135deg, #d5f4e6, #c3f0ca);
+        color: #0f5132;
+        padding: 16px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #a3cfbb;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .login-link {
+        text-align: center;
+        margin-top: 28px;
+        padding-top: 28px;
+        border-top: 1px solid #bdc3c7;
+      }
+
+      .login-link a {
+        color: #3498db;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        padding: 8px 16px;
+        border-radius: 6px;
+      }
+
+      .login-link a:hover {
+        color: #2980b9;
+        background: rgba(52, 152, 219, 0.1);
+        text-decoration: none;
+      }
+
+      @media (max-width: 500px) {
+        body {
+          padding: 15px 10px;
+        }
+        
+        .form-container {
+          padding: 35px 30px;
+        }
+        
+        .page-title {
+          font-size: 24px;
+        }
+        
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        select {
+          padding: 16px 18px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="university-header">
+      <div class="university-logo">GCTU</div>
+      <div class="staff-badge">Staff Portal</div>
+      <h1 class="page-title">Staff Registration</h1>
+      <p class="subtitle">Ghana Communication Technology University</p>
+    </div>
+    
+    <div class="form-container">
+      <div class="staff-info">
+        <h3>🏛️ Staff Registration Information</h3>
+        <p>Register your official GCTU staff account. Your Staff ID will be verified by the administration before account activation.</p>
+      </div>
+
+      <form id="staffRegistrationForm" action="{% url 'register_staff' %}" method="POST">
+        {% csrf_token %}
+        
+        <div class="form-group">
+          <label for="fullName">Full Name <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="text" id="fullName" name="full_name" placeholder="e.g. Dr. Akosua Mensah" required autocomplete="name">
+            <div class="input-icon">👨‍🏫</div>
+          </div>
+          <div class="error-message" id="nameError">Please enter your full name as it appears on official documents</div>
+        </div>
+
+        <div class="form-group">
+          <label for="staffId">Staff ID <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="text" id="staffId" name="staff_id" placeholder="e.g. GT1234" required>
+            <div class="input-icon">🆔</div>
+          </div>
+          <div class="error-message" id="staffIdError">Please enter a valid GCTU Staff ID</div>
+        </div>
+
+        <div class="form-group">
+          <label for="faculty">Faculty <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <select id="faculty" name="faculty" required>
+              <option value="" disabled selected>- Select your faculty -</option>
+              <option value="FoE">Faculty of Engineering (FoE)</option>
+              <option value="FoCIS">Faculty of Computing and Information Systems (FoCIS)</option>
+              <option value="GCTU_Business">GCTU Business School</option>
+            </select>
+          </div>
+          <div class="error-message" id="facultyError">Please select your falculty</div>
+        </div>
+
+        <div class="form-group">
+          <label for="department">Department <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <select id="department" name="department" required>
+              <option value="" disabled selected>--Select your department--</option>
+            </select>
+          </div>
+          <div class="error-message" id="departmentError">Please select your department</div>
+        </div>
+
+        <div class="form-group">
+          <label for="position">Position/Role <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <select id="position" name="position" required>
+              <option value="">Select your position</option>
+              <option value="professor">Professor</option>
+              <option value="associate-professor">Associate Professor</option>
+              <option value="senior-lecturer">Senior Lecturer</option>
+              <option value="lecturer">Lecturer</option>
+              <option value="assistant-lecturer">Assistant Lecturer</option>
+              <option value="research-fellow">Research Fellow</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="error-message" id="positionError">Please select your position</div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Official Email Address <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="email" id="email" name="email" placeholder="e.g. akosua.mensah@gctu.edu.gh" required autocomplete="email">
+            <div class="input-icon">📧</div>
+          </div>
+          <div class="error-message" id="emailError">Please enter a valid GCTU email address</div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="password" id="password" name="password" placeholder="Create a strong password" required minlength="8">
+            <button type="button" class="password-toggle" onclick="togglePassword('password')">Show</button>
+          </div>
+          <div class="password-strength" id="passwordStrength">
+            <div class="password-strength-fill" id="passwordStrengthFill"></div>
+          </div>
+          <div class="error-message" id="passwordError">Password must be at least 8 characters with uppercase, lowercase, number and special character</div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="password" id="confirmPassword" name="confirm_password" placeholder="Confirm your password" required>
+            <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">Show</button>
+          </div>
+          <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <div class="loading" id="loading"></div>
+          <span id="submitText">Register Staff Account</span>
+        </button>
+        
+        <div class="login-link">
+          Already have an account? <a href=".">Sign in to Staff Portal</a>
+        </div>
+      </form>
+    </div>
+
+    <script>
+  const form = document.getElementById('staffRegistrationForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const loading = document.getElementById('loading');
+  const submitText = document.getElementById('submitText');
+
+  // Form validation and enhancement
+  const inputs = {
+    fullName: document.getElementById('fullName'),
+    staffId: document.getElementById('staffId'),
+    department: document.getElementById('department'),
+    position: document.getElementById('position'),
+    email: document.getElementById('email'),
+    password: document.getElementById('password'),
+    confirmPassword: document.getElementById('confirmPassword')
+  };
+
+  const errorMessages = {
+    fullName: document.getElementById('nameError'),
+    staffId: document.getElementById('staffIdError'),
+    department: document.getElementById('departmentError'),
+    position: document.getElementById('positionError'),
+    email: document.getElementById('emailError'),
+    password: document.getElementById('passwordError'),
+    confirmPassword: document.getElementById('confirmPasswordError')
+  };
+
+  // Real-time validation
+  Object.keys(inputs).forEach(key => {
+    inputs[key].addEventListener('input', () => validateField(key));
+    inputs[key].addEventListener('blur', () => validateField(key));
+  });
+
+  // Password strength indicator
+  inputs.password.addEventListener('input', updatePasswordStrength);
+
+  function validateField(fieldName) {
+    const input = inputs[fieldName];
+    const errorElement = errorMessages[fieldName];
+    let isValid = true;
+
+    switch (fieldName) {
+      case 'fullName':
+        isValid = input.value.trim().length >= 3 && /^[a-zA-Z\s.]+$/.test(input.value.trim());
+        break;
+      case 'department':
+      case 'position':
+        isValid = input.value !== '';
+        break;
+      case 'email':
+        isValid = /^[^\s@]+@gctu\.edu\.gh$/.test(input.value) || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value);
+        break;
+      case 'password':
+        isValid = input.value.length >= 8 &&
+          /[a-z]/.test(input.value) &&
+          /[A-Z]/.test(input.value) &&
+          /[0-9]/.test(input.value) &&
+          /[^A-Za-z0-9]/.test(input.value);
+        break;
+      case 'confirmPassword':
+        isValid = input.value === inputs.password.value && input.value.length > 0;
+        break;
+    }
+
+    if (isValid) {
+      input.style.borderColor = '#27ae60';
+      errorElement.style.display = 'none';
+    } else if (input.value.length > 0 || (fieldName === 'department' || fieldName === 'position')) {
+      input.style.borderColor = '#e74c3c';
+      errorElement.style.display = 'block';
+    } else {
+      input.style.borderColor = '#bdc3c7';
+      errorElement.style.display = 'none';
+    }
+
+    return isValid;
+  }
+
+  function updatePasswordStrength() {
+    const password = inputs.password.value;
+    const strengthBar = document.getElementById('passwordStrengthFill');
+    const strengthContainer = document.getElementById('passwordStrength');
+
+    if (password.length === 0) {
+      strengthContainer.style.display = 'none';
+      return;
+    }
+
+    strengthContainer.style.display = 'block';
+
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+    strengthBar.className = 'password-strength-fill';
+    if (strength <= 2) strengthBar.classList.add('strength-weak');
+    else if (strength === 3) strengthBar.classList.add('strength-fair');
+    else if (strength === 4) strengthBar.classList.add('strength-good');
+    else strengthBar.classList.add('strength-strong');
+  }
+
+  function togglePassword(fieldId) {
+    const input = document.getElementById(fieldId);
+    const button = input.nextElementSibling;
+
+    if (input.type === 'password') {
+      input.type = 'text';
+      button.textContent = 'Hide';
+    } else {
+      input.type = 'password';
+      button.textContent = 'Show';
+    }
+  }
+
+  // Validate all fields before allowing submission
+  /*form.addEventListener('submit', function (e) {
+    let allValid = true;
+    Object.keys(inputs).forEach(key => {
+      if (!validateField(key)) {
+        allValid = false;
+      }
+    });
+
+    if (!allValid) {
+      e.preventDefault(); // Block submission
+    } else {
+      // Optional loading state visual
+      submitBtn.disabled = true;
+      loading.style.display = 'inline-block';
+      submitText.textContent = 'Submitting...';
+    }
+  });*/
+
+  // Email validation for GCTU domain
+  /* inputs.email.addEventListener('blur', function(e) {
+    const email = e.target.value;
+    if (email && !email.includes('@gctu.edu.gh') && email.includes('@')) {
+      const warningDiv = document.createElement('div');
+      warningDiv.style.cssText = 'color: #f39c12; font-size: 12px; margin-top: 4px; font-weight: 500;';
+      warningDiv.textContent = '⚠️ Consider using your official GCTU email address';
+
+      // Remove existing warning
+      const existingWarning = e.target.parentNode.parentNode.querySelector('div[style*="color: #f39c12"]');
+      if (existingWarning) existingWarning.remove();
+
+      // Add new warning
+      e.target.parentNode.parentNode.appendChild(warningDiv);
+
+      // Remove warning after 3 seconds
+      setTimeout(() => {
+        if (warningDiv.parentNode) warningDiv.remove();
+      }, 3000);
+    }
+  }); */
+
+  // Faculty -> Department dropdown linkage
+  document.getElementById("faculty").addEventListener("change", function () {
+    var selectedFaculty = this.value;
+    var departmentSelect = document.getElementById("department");
+
+    // Clear previous options
+    departmentSelect.innerHTML = '<option value="" disabled selected>- Select your department -</option>';
+
+    // Faculty → Departments map
+    var departments = {
+      "FoE": [
+        "Telecommunications Engineering Department",
+        "Electrical and Electronics Engineering Department",
+        "Mathematics and Statistics Department",
+        "Department of Computer Engineering"
+      ],
+      "FoCIS": [
+        "Computer Science Department",
+        "Information Technology Department",
+        "Information Systems Department",
+        "Mobile and Pervasive Computing Department"
+      ],
+      "GCTU_Business": [
+        "Management Studies Department",
+        "Economic Department",
+        "Marketing Department",
+        "Procurement and Logistics Department",
+        "Accounting, Banking and Finance Department"
+      ]
+    };
+
+    // Populate departments
+    if (departments[selectedFaculty]) {
+      departments[selectedFaculty].forEach(function (dept) {
+        var option = document.createElement("option");
+        option.value = dept;
+        option.textContent = dept;
+        departmentSelect.appendChild(option);
+      });
+    }
+  });
+</script>
+    </script>
+  </body>
+</html>

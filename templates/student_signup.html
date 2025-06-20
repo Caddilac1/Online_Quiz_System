@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration - Ghana Communication Technology University</title>
+    <link rel="stylesheet" href="{% static 'css/student_signup.css' %}">
+  </head>
+  <body>
+    <div class="university-logo">GCTU</div>
+    <h1 class="page-title">Student Registration</h1>
+    <p class="subtitle">Ghana Communication Technology University</p>
+    
+    <div class="form-container">
+      <div class="success-message" id="successMessage">
+        Registration successful! Please check your email for verification.
+      </div>
+      
+      <form id="registrationForm" action="{% url 'register_student' %}" method="POST" >
+        {% csrf_token %}
+
+                  {% if messages %}
+              {% for message in messages %}
+                {% if message.tags == 'error' %}
+                  <div class="alert alert-danger">
+                {% else %}
+                  <div class="alert alert-{{ message.tags }}">
+                {% endif %}
+                    {{ message }}
+                  </div>
+              {% endfor %}
+            {% endif %}
+
+
+        <div class="form-group">
+          <label for="name">Full Name <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="text" id="name" name="name" placeholder="e.g. Kwame Asante" required autocomplete="name">
+            <div class="input-icon">👤</div>
+          </div>
+          <div class="error-message" id="nameError">Please enter your full name</div>
+        </div>
+
+        <div class="form-group">
+          <label for="indexNumber">Student Index Number <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="text" id="indexNumber" name="index-number" placeholder="e.g. 1674557635" required>
+            <div class="input-icon">🎓</div>
+          </div>
+          <div class="error-message" id="indexError">Please enter a valid GCTU index number (Format: 1674557635)</div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="email" id="email" name="email" placeholder="e.g. kwame.asante@gmail.com" required autocomplete="email">
+            <div class="input-icon">📧</div>
+          </div>
+          <div class="error-message" id="emailError">Please enter a valid email address</div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="password" id="password" name="password" placeholder="Create a strong password" required minlength="8">
+            <button type="button" class="password-toggle" onclick="togglePassword('password')">Show</button>
+          </div>
+          <div class="password-strength" id="passwordStrength">
+            <div class="password-strength-fill" id="passwordStrengthFill"></div>
+          </div>
+          <div class="error-message" id="passwordError">Password must be at least 8 characters long</div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="password" id="confirmPassword" name="confirm_password" placeholder="Confirm your password" required>
+            <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">Show</button>
+          </div>
+          <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <div class="loading" id="loading"></div>
+          <span id="submitText">Create Account</span>
+        </button>
+        
+        <div class="login-link">
+          Already have an account? <a href="{% url 'login' %}">Sign in here</a>
+        </div>
+      </form>
+    </div>
+
+    <script>
+  const inputs = {
+    name: document.getElementById('name'),
+    email: document.getElementById('email'),
+    password: document.getElementById('password'),
+    confirmPassword: document.getElementById('confirmPassword')
+  };
+
+  const errorMessages = {
+    name: document.getElementById('nameError'),
+    email: document.getElementById('emailError'),
+    password: document.getElementById('passwordError'),
+    confirmPassword: document.getElementById('confirmPasswordError')
+  };
+
+  // Real-time validation
+  Object.keys(inputs).forEach(key => {
+    inputs[key].addEventListener('input', () => validateField(key));
+    inputs[key].addEventListener('blur', () => validateField(key));
+  });
+
+  // Password strength
+  inputs.password.addEventListener('input', updatePasswordStrength);
+
+  function validateField(fieldName) {
+    const input = inputs[fieldName];
+    const errorElement = errorMessages[fieldName];
+    let isValid = true;
+
+    switch (fieldName) {
+      case 'name':
+        isValid = input.value.trim().length >= 2;
+        break;
+      case 'email':
+        isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value);
+        break;
+      case 'password':
+        isValid = input.value.length >= 8;
+        break;
+      case 'confirmPassword':
+        isValid = input.value === inputs.password.value && input.value.length > 0;
+        break;
+    }
+
+    if (isValid) {
+      input.style.borderColor = '#48bb78'; // green
+      errorElement.style.display = 'none';
+    } else if (input.value.length > 0) {
+      input.style.borderColor = '#f56565'; // red
+      errorElement.style.display = 'block';
+    } else {
+      input.style.borderColor = '#e2e8f0'; // default
+      errorElement.style.display = 'none';
+    }
+
+    return isValid;
+  }
+
+  function updatePasswordStrength() {
+    const password = inputs.password.value;
+    const strengthBar = document.getElementById('passwordStrengthFill');
+    const strengthContainer = document.getElementById('passwordStrength');
+
+    if (password.length === 0) {
+      strengthContainer.style.display = 'none';
+      return;
+    }
+
+    strengthContainer.style.display = 'block';
+
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+    strengthBar.className = 'password-strength-fill';
+    if (strength <= 2) strengthBar.classList.add('strength-weak');
+    else if (strength === 3) strengthBar.classList.add('strength-fair');
+    else if (strength === 4) strengthBar.classList.add('strength-good');
+    else strengthBar.classList.add('strength-strong');
+  }
+
+  function togglePassword(fieldId) {
+    const input = document.getElementById(fieldId);
+    const button = input.nextElementSibling;
+
+    if (input.type === 'password') {
+      input.type = 'text';
+      button.textContent = 'Hide';
+    } else {
+      input.type = 'password';
+      button.textContent = 'Show';
+    }
+  }
+</script>
+
+  </body>
+</html>

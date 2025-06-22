@@ -23,3 +23,22 @@ def send_verification_email(user, request):
         [user.email],
         fail_silently=False,
     )
+
+
+def send_staff_approval_email(staff_user):
+    subject = "Your GCTU Staff Account Has Been Approved"
+    
+    html_content = render_to_string("staff_approved.html", {
+        'full_name': staff_user.get_full_name(),
+        'site_name': "GCTU Exams System",
+        'login_url': "http://127.0.0.1:8000/login/",  # Update if deployed
+    })
+
+    email = EmailMultiAlternatives(
+        subject=subject,
+        body="",
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[staff_user.email],
+    )
+    email.attach_alternative(html_content, "text/html")
+    email.send()

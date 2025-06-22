@@ -1,19 +1,718 @@
-{% extends 'base.html' %}
-{% block title %}Lecturer Dashboard{% endblock %}
-{% block content %}
-  <h2>Welcome, {{ request.user.get_full_name }}</h2>
-  <a href="." class="btn btn-primary mb-3">Create New Quiz</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard - Peter Parker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <h4>Your Quizzes:</h4>
-  <ul>
-    {% for quiz in quizzes %}
-      <li>
-        <strong>{{ quiz.title }}</strong> ({{ quiz.course.code }})
-        <br>
-        Questions: {{ quiz.number_of_questions }} | Duration: {{ quiz.duration_minutes }} mins
-      </li>
-    {% empty %}
-      <li>You haven’t created any quizzes yet.</li>
-    {% endfor %}
-  </ul>
-{% endblock %}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 32px;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .header {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .wave-emoji {
+            font-size: 2rem;
+        }
+
+        .header-info {
+            display: flex;
+            gap: 32px;
+            margin-bottom: 24px;
+            color: #64748b;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #6366f1;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5b21b6;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: white;
+            color: #3b82f6;
+            border: 2px solid #3b82f6;
+        }
+
+        .btn-outline:hover {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .section {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+
+        .table th,
+        .table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .table th {
+            font-weight: 600;
+            color: #64748b;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .table td {
+            font-size: 0.875rem;
+            color: #334155;
+        }
+
+        .table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .see-all-link {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .see-all-link:hover {
+            text-decoration: underline;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .profile-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #93c5fd;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 auto 16px;
+        }
+
+        .profile-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .profile-email {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-bottom: 16px;
+        }
+
+        .profile-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .profile-detail {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+        }
+
+        .profile-detail .label {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .profile-detail .value {
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .verified-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #dcfce7;
+            color: #166534;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        .checkmark {
+            width: 16px;
+            height: 16px;
+            background: #22c55e;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .edit-profile-btn {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .edit-profile-btn:hover {
+            text-decoration: underline;
+        }
+
+        .announcements {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .announcement-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .announcement-item:last-child {
+            border-bottom: none;
+        }
+
+        .announcement-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ddd6fe;
+            color: #7c3aed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .announcement-content {
+            flex: 1;
+        }
+
+        .announcement-text {
+            color: #334155;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .question-bank-tabs {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 24px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            padding: 4px;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            background: white;
+            color: #1e293b;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .add-question-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .add-question-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .plus-icon {
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            
+            .sidebar {
+                order: -1;
+            }
+            
+            .header-info {
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+            
+            .action-buttons {
+                gap: 8px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .header {
+                padding: 24px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .table {
+                font-size: 0.8rem;
+            }
+            
+            .table th,
+            .table td {
+                padding: 12px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <h1>Welcome back, Peter Parker <span class="wave-emoji">👋</span></h1>
+                
+                <div class="header-info">
+                    <div class="info-item">
+                        <span class="info-label">Faculty:</span>
+                        <span class="info-value">FoCIS</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Position:</span>
+                        <span class="info-value">Assistant Lecturer</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Staff ID:</span>
+                        <span class="info-value">GCTU-045678</span>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="createQuiz()">Create Quiz</button>
+                    <button class="btn btn-secondary" onclick="addQuestion()">Add Question to Bank</button>
+                    <button class="btn btn-outline" onclick="viewResults()">View Quiz Results</button>
+                    <button class="btn btn-outline" onclick="viewCourse()">View Course</button>
+                </div>
+            </div>
+
+            <!-- Assigned Courses -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Assigned Courses</h2>
+                    <a href="#" class="see-all-link" onclick="seeAllCourses()">See All Courses</a>
+                </div>
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Title</th>
+                            <th>Students</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr onclick="selectCourse('CS202')">
+                            <td><strong>CS202</strong></td>
+                            <td>Data Structures</td>
+                            <td>132</td>
+                        </tr>
+                        <tr onclick="selectCourse('IT204')">
+                            <td><strong>IT204</strong></td>
+                            <td>Web Development</td>
+                            <td>98</td>
+                        </tr>
+                        <tr onclick="selectCourse('IS304')">
+                            <td><strong>IS304</strong></td>
+                            <td>Operating Systems</td>
+                            <td>110</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Quizzes Created -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Quizzes Created</h2>
+                    <a href="#" class="see-all-link" onclick="seeAllQuizzes()">See All Courses</a>
+                </div>
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Attempts</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Quiz 1</strong></td>
+                            <td>75</td>
+                            <td>45 mins</td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td><button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.75rem;" onclick="editQuiz('Quiz 1')">Edit</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Midterm Exam</strong></td>
+                            <td>51</td>
+                            <td>60 mins</td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td><button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.75rem;" onclick="editQuiz('Midterm Exam')">Edit</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Question Bank -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Question Bank</h2>
+                    <button class="add-question-btn" onclick="addQuestion()">
+                        <span class="plus-icon">+</span>
+                        Add Question
+                    </button>
+                </div>
+                
+                <div class="question-bank-tabs">
+                    <button class="tab active" onclick="switchTab('general')">General</button>
+                    <button class="tab" onclick="switchTab('my-questions')">My Questions</button>
+                </div>
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Course</th>
+                            <th>Attempts</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr onclick="viewQuestion('Quiz 1')">
+                            <td><strong>Quiz 1</strong></td>
+                            <td>CS202</td>
+                            <td>75%</td>
+                            <td>45 mins</td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Profile Card -->
+            <div class="profile-card">
+                <div class="profile-avatar">PP</div>
+                <div class="profile-name">Peter Parker</div>
+                <div class="profile-email">peter.parker@exampi.com</div>
+                
+                <div class="profile-details">
+                    <div class="profile-detail">
+                        <span class="label">Faculty:</span>
+                        <span class="value">FoCIS</span>
+                    </div>
+                    <div class="profile-detail">
+                        <span class="label">Department:</span>
+                        <span class="value">Computer Science</span>
+                    </div>
+                    <div class="profile-detail">
+                        <span class="label">Position:</span>
+                        <span class="value">Assistant Lecturer</span>
+                    </div>
+                </div>
+                
+                <div class="verified-badge">
+                    <div class="checkmark">✓</div>
+                    Verified
+                </div>
+                
+                <a href="#" class="edit-profile-btn" onclick="editProfile()">Edit Profile</a>
+            </div>
+
+            <!-- Announcements -->
+            <div class="announcements">
+                <h3 class="section-title">Announcements</h3>
+                <div class="announcement-item">
+                    <div class="announcement-icon">🔧</div>
+                    <div class="announcement-content">
+                        <div class="announcement-text">System maintenance is scheduled for Saturday.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Interactive functionality
+        function createQuiz() {
+            alert('Create Quiz functionality would be implemented here');
+        }
+
+        function addQuestion() {
+            alert('Add Question functionality would be implemented here');
+        }
+
+        function viewResults() {
+            alert('View Quiz Results functionality would be implemented here');
+        }
+
+        function viewCourse() {
+            alert('View Course functionality would be implemented here');
+        }
+
+        function seeAllCourses() {
+            alert('See All Courses functionality would be implemented here');
+        }
+
+        function seeAllQuizzes() {
+            alert('See All Quizzes functionality would be implemented here');
+        }
+
+        function selectCourse(courseCode) {
+            alert(`Selected course: ${courseCode}`);
+        }
+
+        function editQuiz(quizName) {
+            alert(`Edit quiz: ${quizName}`);
+        }
+
+        function viewQuestion(questionTitle) {
+            alert(`View question: ${questionTitle}`);
+        }
+
+        function editProfile() {
+            alert('Edit Profile functionality would be implemented here');
+        }
+
+        function switchTab(tabName) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // In a real application, this would load different content
+            console.log(`Switched to ${tabName} tab`);
+        }
+
+        // Add hover effects and animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate cards on load
+            const sections = document.querySelectorAll('.section, .profile-card, .announcements');
+            sections.forEach((section, index) => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                    section.style.opacity = '1';
+                    section.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+
+            // Add click feedback to buttons
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

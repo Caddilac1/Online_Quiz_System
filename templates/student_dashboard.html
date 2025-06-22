@@ -1,16 +1,510 @@
-{% extends 'base.html' %}
-{% block title %}Student Dashboard{% endblock %}
-{% block content %}
-  <h2>Welcome, {{ request.user.get_full_name }}</h2>
-  <p>Your available quizzes:</p>
-  <ul>
-    {% for quiz in quizzes %}
-      <li>
-        <a href="{% url 'start_quiz' quiz.id %}">{{ quiz.title }}</a>
-        ({{ quiz.course.code }} - {{ quiz.course.title }})
-      </li>
-    {% empty %}
-      <li>No quizzes available at the moment.</li>
-    {% endfor %}
-  </ul>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .welcome-section h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .wave {
+            font-size: 24px;
+        }
+
+        .student-info {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .take-quiz-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .take-quiz-btn:hover {
+            background: #2563eb;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        .left-section {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .quiz-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .quiz-table th {
+            text-align: left;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 500;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .quiz-table td {
+            padding: 16px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .quiz-table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .view-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .view-btn:hover {
+            background: #2563eb;
+        }
+
+        .time-urgent {
+            color: #dc2626;
+            font-weight: 500;
+        }
+
+        .time-warning {
+            color: #d97706;
+            font-weight: 500;
+        }
+
+        .time-normal {
+            color: #059669;
+            font-weight: 500;
+        }
+
+        .see-all-link {
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .see-all-link a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .see-all-link a:hover {
+            text-decoration: underline;
+        }
+
+        .current-quiz-alert {
+            background: #3b82f6;
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .current-quiz-alert .icon {
+            margin-right: 12px;
+        }
+
+        .resume-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .resume-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .results-table th {
+            text-align: left;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 500;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .results-table td {
+            padding: 16px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .score-good {
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .score-average {
+            color: #d97706;
+            font-weight: 600;
+        }
+
+        .status-completed {
+            background: #dcfce7;
+            color: #166534;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .right-section {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .profile-card {
+            text-align: center;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            background: #93c5fd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 600;
+            color: white;
+            margin: 0 auto 16px;
+        }
+
+        .profile-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .profile-email {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .profile-details {
+            text-align: left;
+            color: #64748b;
+            font-size: 14px;
+            line-height: 2;
+        }
+
+        .profile-details strong {
+            color: #1e293b;
+        }
+
+        .edit-profile-btn {
+            background: transparent;
+            color: #3b82f6;
+            border: 1px solid #3b82f6;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 16px;
+            transition: all 0.2s;
+        }
+
+        .edit-profile-btn:hover {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .announcement {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px 0;
+        }
+
+        .announcement-icon {
+            background: #3b82f6;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .announcement-text {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="welcome-section">
+                <h1>Welcome back, Alex Johnson <span class="wave">👋</span></h1>
+                <div class="student-info">
+                    Faculty: FoCIS &nbsp;&nbsp; Department: Computer Science<br>
+                    Level: 200 &nbsp;&nbsp; GCTU-ST-01234
+                </div>
+            </div>
+            <button class="take-quiz-btn" onclick="takeQuiz()">Take Quiz</button>
+        </div>
+
+        <div class="current-quiz-alert">
+            <div style="display: flex; align-items: center;">
+                <span class="icon">✏️</span>
+                <span>You are currently attempting CS202 Quiz 1</span>
+            </div>
+            <button class="resume-btn" onclick="resumeQuiz()">Resume</button>
+        </div>
+
+        <div class="main-content">
+            <div class="left-section">
+                <div class="card">
+                    <h2>Upcoming Quizzes</h2>
+                    <table class="quiz-table">
+                        <thead>
+                            <tr>
+                                <th>Course</th>
+                                <th>Title</th>
+                                <th>Time Left</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>CS202</td>
+                                <td>Data Structures</td>
+                                <td class="time-normal">3 days</td>
+                                <td><button class="view-btn" onclick="viewQuiz('CS202')">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>CS305</td>
+                                <td>Algorithms</td>
+                                <td class="time-urgent">2 hours</td>
+                                <td><button class="view-btn" onclick="viewQuiz('CS305')">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>IS210</td>
+                                <td>Database Systems</td>
+                                <td class="time-normal">5 days</td>
+                                <td><button class="view-btn" onclick="viewQuiz('IS210')">View</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="see-all-link">
+                        <a href="#" onclick="seeAllQuizzes()">See All Quizzes</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Past Results</h2>
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                <th>Score</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Quiz 1</td>
+                                <td>CS101</td>
+                                <td class="score-good">85%</td>
+                                <td><span class="status-completed">Completed</span></td>
+                                <td>June 15</td>
+                            </tr>
+                            <tr>
+                                <td>Midterm Quiz</td>
+                                <td>IT202</td>
+                                <td class="score-average">70%</td>
+                                <td><span class="status-completed">Completed</span></td>
+                                <td>May 28</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="right-section">
+                <div class="card profile-card">
+                    <div class="avatar">AJ</div>
+                    <div class="profile-name">Alex Johnson</div>
+                    <div class="profile-email">alex.johnson@example.com</div>
+                    <div class="profile-details">
+                        <div><strong>Student ID:</strong> GCTU-ST-01234</div>
+                        <div><strong>Faculty:</strong> FoCIS</div>
+                        <div><strong>Department:</strong> Computer Science</div>
+                        <div><strong>Level:</strong> 200</div>
+                    </div>
+                    <button class="edit-profile-btn" onclick="editProfile()">Edit Profile</button>
+                </div>
+
+                <div class="card">
+                    <h2>Announcements</h2>
+                    <div class="announcement">
+                        <div class="announcement-icon">🔔</div>
+                        <div class="announcement-text">
+                            Quiz for CS302 will start at 10:00 AM tomorrow.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function takeQuiz() {
+            alert('Redirecting to quiz selection...');
+        }
+
+        function resumeQuiz() {
+            alert('Resuming CS202 Quiz 1...');
+        }
+
+        function viewQuiz(course) {
+            alert(`Viewing quiz details for ${course}...`);
+        }
+
+        function seeAllQuizzes() {
+            alert('Loading all quizzes...');
+        }
+
+        function editProfile() {
+            alert('Opening profile editor...');
+        }
+
+        // Add some interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate cards on load
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+
+            // Update time dynamically (simulate countdown)
+            const timeElements = document.querySelectorAll('.time-urgent, .time-warning, .time-normal');
+            timeElements.forEach(element => {
+                if (element.textContent === '2 hours') {
+                    let hours = 2;
+                    let minutes = 0;
+                    setInterval(() => {
+                        minutes--;
+                        if (minutes < 0) {
+                            hours--;
+                            minutes = 59;
+                        }
+                        if (hours >= 0) {
+                            element.textContent = `${hours}h ${minutes}m`;
+                        }
+                    }, 60000); // Update every minute (sped up for demo)
+                }
+            });
+        });
+    </script>
+</body>
+</html>

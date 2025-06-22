@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
+from django.core.mail import send_mail
 from django.contrib import messages
 from .models import *
 from django.contrib.auth.hashers import make_password
@@ -129,12 +130,13 @@ def register_staff(request):
 
         errors = []
 
+        # ===== VALIDATION =====
         if not full_name:
             errors.append("Full name is required.")
         if not staff_id:
             errors.append("Staff ID is required.")
         if not email or '@' not in email:
-            errors.append("Valid email is required.")
+            errors.append("A valid email is required.")
         if password != confirm_password:
             errors.append("Passwords do not match.")
         if CustomUser.objects.filter(email=email).exists():
@@ -147,23 +149,22 @@ def register_staff(request):
                 messages.error(request, error)
             return render(request, 'staff_signup.html')
 
-        # Split name
+        # ===== CREATE USER =====
         name_parts = full_name.split()
         first_name = name_parts[0]
         last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
 
-        # Create the user with is_active=False (pending activation)
         user = CustomUser.objects.create(
             username=email,
             email=email,
             first_name=first_name,
             last_name=last_name,
             user_type='staff',
-            is_active=False,
+            is_active=False,  # Must verify email first
             password=make_password(password)
         )
 
-        # Create staff profile
+        # ===== CREATE PROFILE =====
         StaffProfile.objects.create(
             user=user,
             staff_id=staff_id,
@@ -172,13 +173,14 @@ def register_staff(request):
             position=position
         )
 
+       
         send_staff_activation_email(user, request)
-        return render(request, 'email_sent.html', {'user': user})
 
-        # Notify admin to activate
+        
         notify_admin_of_staff_registration(user, staff_id)
 
-        return render(request, 'staff_registration_success.html', {'email': email})
+       
+        return render(request, 'email_sent.html', {'user': user})
 
     return render(request, 'staff_signup.html')
 
@@ -217,18 +219,23 @@ If you didn’t sign up, you can safely ignore this email.
 
 def notify_admin_of_staff_registration(user, staff_id):
     subject = "New Staff Registration - GCTU Exams System"
-    message = render_to_string('notify_admin.html', {
-        'staff': user,
+    
+    html_message = render_to_string('notify_admin.html', {
+        'full_name': user.get_full_name(),
         'staff_id': staff_id,
+        'email': user.email,
+        'faculty': user.staffprofile.faculty,
+        'department': user.staffprofile.department,
+        'position': user.staffprofile.position,
+        'site_name': "GCTU Exams System",
     })
 
-    send_mail(
-        subject,
-        message,
-        settings.DEFAULT_FROM_EMAIL,
-        [settings.ADMIN_EMAIL],  # e.g., admin@gctu.edu.gh
-        fail_silently=False,
-    )
+    from_email = settings.DEFAULT_FROM_EMAIL
+    to_email = [settings.ADMIN_EMAIL]
+
+    email = EmailMultiAlternatives(subject, '', from_email, to_email)
+    email.attach_alternative(html_message, "text/html")
+    email.send()
 
 
 def activate_account(request, uidb64, token):
@@ -241,11 +248,16 @@ def activate_account(request, uidb64, token):
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
-        return render(request, 'email_verified.html')
-    else:
-        return render(request, 'email_failed.html')
 
+        
+        if user.user_type == 'staff' and hasattr(user, 'staffprofile'):
+            staff_profile = user.staffprofile
+            if not staff_profile.is_approved:
+                return render(request, 'pending_approval.html') 
 
+        return render(request, 'email_verified.html')  
+
+    return render(request, 'activation_failed.html')
 
 def login_view(request):
     if request.method == "POST":

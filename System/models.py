@@ -36,6 +36,7 @@ class CustomUser(AbstractUser):
     user_type = models.CharField(max_length=10, choices=USER_TYPES)
     email = models.EmailField(_('email address'), unique=True)
     username = models.CharField(max_length=150, unique=True, blank=True, null=True)
+    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
 
     USERNAME_FIELD = 'username'  # Use username for login
     REQUIRED_FIELDS = ['email','user_type']  # Add any other required fields here
@@ -55,13 +56,47 @@ class CustomUser(AbstractUser):
 # ==============================
 
 
+LEVEL_CHOICES = [
+    ('100', 'Level 100'),
+    ('200', 'Level 200'),
+    ('300', 'Level 300'),
+    ('400', 'Level 400'),
+]
+
+GROUP_CHOICES = [
+    ('A', 'Group A'),
+    ('B', 'Group B'),
+    ('C', 'Group C'),
+    ('D', 'Group D'),
+    ('E', 'Group E'),
+    ('F', 'Group F'),
+    ('G', 'Group G'),
+    ('H', 'Group H'),
+    ('I', 'Group I'),
+    ('J', 'Group J'),
+    ('K', 'Group K'),
+    ('L', 'Group L'),
+    ('M', 'Group M'),
+    ('N', 'Group N'),
+    ('O', 'Group O'),
+    ('P', 'Group P'),
+]
+
+SESSION_CHOICES = [
+    ('regular', 'Regular'),
+    ('evening', 'Evening'),
+    ('weekend', 'Weekend'),
+]
 
 class StudentProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     student_id = models.CharField(max_length=20, unique=True)
     faculty = models.CharField(max_length=100, blank=True)
     department = models.CharField(max_length=100, blank=True)
-    level = models.CharField(max_length=10, blank=True)
+    level = models.CharField(max_length=10, blank=True,choices=LEVEL_CHOICES, default='100')
+    group = models.CharField(max_length=5, blank=True,choices=GROUP_CHOICES)
+    session = models.CharField(max_length=20, blank=True)
+
 
     def __str__(self):
         return f"{self.user.get_full_name()} ({self.student_id})"
@@ -148,7 +183,24 @@ class Question(models.Model):
 # ==============================
 # QUIZ SETUP
 # ==============================
-
+GROUP_CHOICES = [
+    ('Group A', 'Group A'),
+    ('Group B', 'Group B'),
+    ('Group C', 'Group C'),
+    ('Group D', 'Group D'),
+    ('Group E', 'Group E'),
+    ('Group F', 'Group F'),
+    ('Group G', 'Group G'),
+    ('Group H', 'Group H'),
+    ('Group I', 'Group I'),
+    ('Group J', 'Group J'),
+    ('Group K', 'Group K'),
+    ('Group L', 'Group L'),
+    ('Group M', 'Group M'),
+    ('Group N', 'Group N'),
+    ('Group O', 'Group O'),
+    ('Group P', 'Group P'),
+]
 class Quiz(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
@@ -164,6 +216,10 @@ class Quiz(models.Model):
     randomize_questions = models.BooleanField(default=True)
     randomize_options = models.BooleanField(default=False)
     visibility_to_students = models.BooleanField(default=True)
+    session = models.CharField(max_length=20, blank=True)
+    groups = models.CharField(max_length=100, blank=True, choices=GROUP_CHOICES)  # Comma-separated list of groups allowed to take the quiz
+    is_open = models.BooleanField(default=True)
+    additional_info = models.TextField(blank=True, null=True)  # For any extra instructions or notes
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

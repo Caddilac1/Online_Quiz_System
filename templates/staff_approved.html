@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Account Approved</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f6f9fc; color: #333; padding: 20px; }
+        .email-container { background-color: white; padding: 30px; border-radius: 8px; max-width: 600px; margin: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+        h2 { color: #27ae60; }
+        .button { margin-top: 25px; display: inline-block; background-color: #0a74da; color: white; padding: 12px 20px; text-decoration: none; border-radius: 6px; }
+        .footer { margin-top: 30px; font-size: 12px; color: #777; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <h2>🎉 You're In!</h2>
+        <p>Hello {{ full_name }},</p>
+        <p>Your staff account has been verified and approved by the admin.</p>
+        <p>You can now log in and access the GCTU Exams System.</p>
+        <a href="{{ login_url }}" class="button">Login to Portal</a>
+        <div class="footer">
+            GCTU Exams System &mdash; Powered by {{ site_name }}
+        </div>
+    </div>
+</body>
+</html>

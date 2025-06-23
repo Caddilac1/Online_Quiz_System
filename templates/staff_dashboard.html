@@ -354,6 +354,29 @@
             padding: 4px;
         }
 
+        .profile-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #007bff;
+            color: #fff;
+            font-weight: bold;
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            text-transform: uppercase;
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+
         .tab {
             padding: 8px 16px;
             border: none;
@@ -455,20 +478,20 @@
         <div class="main-content">
             <!-- Header -->
             <div class="header">
-                <h1>Welcome back, Peter Parker <span class="wave-emoji">👋</span></h1>
+                <h1>Welcome back, {{request.user.full_name}} <span class="wave-emoji">👋</span></h1>
                 
                 <div class="header-info">
                     <div class="info-item">
                         <span class="info-label">Faculty:</span>
-                        <span class="info-value">FoCIS</span>
+                        <span class="info-value">{{request.user.staffprofile.faculty}}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Position:</span>
-                        <span class="info-value">Assistant Lecturer</span>
+                        <span class="info-value">{{request.user.staffprofile.position}}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Staff ID:</span>
-                        <span class="info-value">GCTU-045678</span>
+                        <span class="info-value">{{request.user.staffprofile.staff_id}}</span>
                     </div>
                 </div>
 
@@ -593,28 +616,41 @@
         <div class="sidebar">
             <!-- Profile Card -->
             <div class="profile-card">
-                <div class="profile-avatar">PP</div>
-                <div class="profile-name">Peter Parker</div>
-                <div class="profile-email">peter.parker@exampi.com</div>
+                <div class="profile-avatar">
+                    {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="{{ user.get_full_name }}" class="avatar-img">
+                    {% else %}
+                        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                    {% endif %}
+                </div>
+
+
+                <div class="profile-name">{{request.user.full_name}}</div>
+                <div class="profile-email">{{request.user.email}}</div>
                 
                 <div class="profile-details">
                     <div class="profile-detail">
                         <span class="label">Faculty:</span>
-                        <span class="value">FoCIS</span>
+                        <span class="value">{{request.user.staffprofile.faculty}}</span>
                     </div>
                     <div class="profile-detail">
                         <span class="label">Department:</span>
-                        <span class="value">Computer Science</span>
+                        <span class="value">{{request.user.staffprofile.department}}</span>
                     </div>
                     <div class="profile-detail">
                         <span class="label">Position:</span>
-                        <span class="value">Assistant Lecturer</span>
+                        <span class="value">{{request.user.staffprofile.position}}</span>
                     </div>
                 </div>
                 
                 <div class="verified-badge">
+                    {% if request.user.staffprofile.is_approved %}
                     <div class="checkmark">✓</div>
                     Verified
+                    {% else %}
+                    <div class="checkmark">✗</div>
+                    Not Verified
+                    {% endif %}
                 </div>
                 
                 <a href="#" class="edit-profile-btn" onclick="editProfile()">Edit Profile</a>

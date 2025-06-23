@@ -24,6 +24,8 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 SECRET_KEY = env("SECRET_KEY")
 
+GOOGLE_SHEET_CREDENTIALS = os.path.join(BASE_DIR, 'sheet_credentials.json')
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/

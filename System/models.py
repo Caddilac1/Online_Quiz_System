@@ -91,8 +91,8 @@ SESSION_CHOICES = [
 class StudentProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     student_id = models.CharField(max_length=20, unique=True)
-    faculty = models.CharField(max_length=100, blank=True)
-    department = models.CharField(max_length=100, blank=True)
+    faculty = models.ForeignKey('Faculty', on_delete=models.SET_NULL, null=True, blank=True)
+    department = models.ForeignKey('Department', on_delete=models.SET_NULL, null=True, blank=True)
     level = models.CharField(max_length=10, blank=True,choices=LEVEL_CHOICES, default='100')
     group = models.CharField(max_length=5, blank=True,choices=GROUP_CHOICES)
     session = models.CharField(max_length=20, blank=True)
@@ -105,9 +105,9 @@ class StudentProfile(models.Model):
 class StaffProfile(models.Model):
     user = models.OneToOneField('CustomUser', on_delete=models.CASCADE)
     staff_id = models.CharField(max_length=20, unique=True)
-    faculty = models.CharField(max_length=100, blank=True)
+    faculty = models.ForeignKey('Faculty', on_delete=models.SET_NULL, null=True, blank=True)
     position = models.CharField(max_length=100, blank=True)
-    department = models.CharField(max_length=100, blank=True)
+    department = models.ForeignKey('Department', on_delete=models.SET_NULL, null=True, blank=True)
     courses_assigned = models.ManyToManyField('Course', blank=True)
     is_verified = models.BooleanField(default=False)
     is_approved = models.BooleanField(default=False)
@@ -142,11 +142,16 @@ class AssignedCourse(models.Model):
 # ==============================
 
 class Course(models.Model):
-    code = models.CharField(max_length=10, unique=True)
+    code = models.CharField(max_length=10)
     title = models.CharField(max_length=100)
+    department = models.ForeignKey('Department', on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('code', 'department')
 
     def __str__(self):
-        return f"{self.code} - {self.title}"
+        return f"{self.code} - {self.title} [{self.department.name}]"
+
 
 # ==============================
 # QUESTION BANK (General + Personal)
@@ -163,18 +168,34 @@ class QuestionBank(models.Model):
         bank_type = "General" if self.is_general else "Personal"
         return f"{self.title} ({bank_type})"
 
+
+class Faculty(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Department(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name='departments')
+
+    def __str__(self):
+        return f"{self.name} ({self.faculty.name})"
+       
+
 class Question(models.Model):
     bank = models.ForeignKey(QuestionBank, on_delete=models.CASCADE)
     text = models.TextField()
     option_a = models.CharField(max_length=300)
     option_b = models.CharField(max_length=300)
-    option_c = models.CharField(max_length=300)
-    option_d = models.CharField(max_length=300)
+    option_c = models.CharField(max_length=300, blank=True, null=True)  # optional third option
+    option_d = models.CharField(max_length=300, blank=True, null=True)  # optional fourth option
     correct_option = models.CharField(
         max_length=1,
         choices=[('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')]
     )
-    tag = models.CharField(max_length=100, blank=True)  # optional topic tag
+    tag = models.CharField(max_length=100, blank=True, null=True)  # optional topic tag
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -249,3 +270,41 @@ class StudentAnswer(models.Model):
 
     def __str__(self):
         return f"{self.question.id} - {self.selected_option}"
+
+
+
+
+class GoogleSheetQuiz(models.Model):
+    question_bank = models.ForeignKey(
+        'QuestionBank',
+        on_delete=models.CASCADE,
+        limit_choices_to={'is_general': True}
+    )
+    sheet_id = models.CharField(max_length=100, blank=True, null=True)
+    shared_with = models.ManyToManyField('StaffProfile', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.question_bank.title} Quiz Sheet"
+
+    def sheet_url(self):
+        if self.sheet_id:
+            return f"https://docs.google.com/spreadsheets/d/{self.sheet_id}/edit"
+        return None
+
+    def course(self):
+        return self.question_bank.course
+
+    def created_by(self):
+        return self.question_bank.created_by
+
+
+class SheetTask(models.Model):
+    course = models.ForeignKey('Course', on_delete=models.CASCADE)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    shared_with = models.ManyToManyField(StaffProfile, blank=True)  # ✅ Add this
+    sheet_url = models.URLField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.course.code} - {self.course.title} [{self.course.department.name}]"

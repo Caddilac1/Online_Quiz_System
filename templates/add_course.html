@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Course</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="container py-5">
+    <!-- Add Course Form -->
+    <div class="row justify-content-center">
+      <div class="col-lg-6">
+        <div class="card shadow border-0 rounded-4">
+          <div class="card-header bg-primary text-white rounded-top-4">
+            <h4 class="mb-0"><i class="fas fa-book-open me-2"></i> Add New Course</h4>
+          </div>
+          <div class="card-body">
+            {% if messages %}
+              {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              {% endfor %}
+            {% endif %}
+
+            <form method="post" novalidate>
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="id_code" class="form-label">Course Code</label>
+                {{ form.code }}
+                {% if form.code.errors %}
+                  <div class="text-danger small">{{ form.code.errors.as_text|cut:"* "|safe }}</div>
+                {% endif %}
+              </div>
+
+              <div class="mb-3">
+                <label for="id_title" class="form-label">Course Title</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                  <div class="text-danger small">{{ form.title.errors.as_text|cut:"* "|safe }}</div>
+                {% endif %}
+              </div>
+
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-plus-circle me-1"></i> Add Course
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Existing Courses -->
+    <div class="row justify-content-center mt-5">
+      <div class="col-lg-8">
+        <div class="card shadow-sm border-0 rounded-4">
+          <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i> All Available Courses</h5>
+          </div>
+          <div class="card-body">
+            {% if courses %}
+              <div class="row row-cols-1 row-cols-md-2 g-3">
+                {% for course in courses %}
+                  <div class="col">
+                    <div class="bg-white border rounded px-3 py-2 d-flex justify-content-between align-items-center">
+                      <div>
+                        <span class="badge bg-primary">{{ course.code }}</span>
+                        <span class="ms-2">{{ course.title }}</span>
+                      </div>
+                      <i class="fas fa-book text-secondary"></i>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <p class="text-muted">No courses found yet. Add the first course above.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

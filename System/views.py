@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
-from .forms import StudentRegistrationForm, StaffRegistrationForm
+from .forms import *
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login
+from .utils.sheets import create_and_share_sheet, import_questions_from_sheet
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import user_passes_test
 from django.core.mail import send_mail
 from django.contrib import messages
 from .models import *
@@ -345,3 +347,46 @@ def staff_dashboard(request):
     if hasattr(request.user, 'staffprofile'):
         return render(request, 'staff_dashboard.html', {'staff': request.user.staffprofile})
     return redirect('login')
+
+
+@login_required
+def add_course(request):
+    if not (request.user.is_superuser or request.user.user_type == 'admin'):
+        return redirect('login')  
+
+    if request.method == 'POST':
+        form = CourseForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('add_course')  
+    else:
+        form = CourseForm()
+
+    courses = Course.objects.all()
+    return render(request, 'add_course.html', {'form': form, 'courses': courses})    
+
+
+@user_passes_test(lambda u: u.is_superuser or u.user_type == 'admin')
+def create_department_admin(request):
+    if request.method == 'POST':
+        form = DepartmentAdminCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.user_type = 'staff'
+            user.save()
+
+            StaffProfile.objects.create(
+                user=user,
+                faculty=form.cleaned_data['faculty'],
+                department=form.cleaned_data['department'],
+                position="Department Admin",
+                is_verified=True,
+                is_approved=True
+            )
+
+            messages.success(request, "Department Admin created successfully!")
+            return redirect('create_department_admin')
+    else:
+        form = DepartmentAdminCreationForm()
+
+    return render(request, 'create_department_admin.html', {'form': form})

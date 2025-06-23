@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Department Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-6">
+        <div class="card shadow rounded-4 border-0">
+          <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Create Department Admin</h4>
+          </div>
+          <div class="card-body">
+            {% if messages %}
+              {% for message in messages %}
+                <div class="alert alert-success">{{ message }}</div>
+              {% endfor %}
+            {% endif %}
+
+            <form method="post" action="{% url 'create_department_admin' %}">
+              {% csrf_token %}
+              {{ form.email.label_tag }} {{ form.email }}
+              {{ form.username.label_tag }} {{ form.username }}
+              {{ form.password1.label_tag }} {{ form.password1 }}
+              {{ form.password2.label_tag }} {{ form.password2 }}
+
+              <div class="form-group">
+          <label for="faculty">Faculty <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <select id="faculty" name="faculty" required>
+              <option value="" disabled selected>- Select your faculty -</option>
+              <option value="FoE">Faculty of Engineering (FoE)</option>
+              <option value="FoCIS">Faculty of Computing and Information Systems (FoCIS)</option>
+              <option value="GCTU_Business">GCTU Business School</option>
+            </select>
+          </div>
+          <div class="error-message" id="facultyError">Please select your falculty</div>
+        </div>
+
+        <div class="form-group">
+          <label for="department">Department <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <select id="department" name="department" required>
+              <option value="" disabled selected>--Select your department--</option>
+            </select>
+          </div>
+          <div class="error-message" id="departmentError">Please select your department</div>
+        </div>
+
+
+              <button type="submit" class="btn btn-success w-100">Create Admin</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <script>
+    const facultyToDepartments = {
+      "FoE": [
+        "Telecommunications Engineering Department",
+        "Electrical and Electronics Engineering Department",
+        "Mathematics and Statistics Department",
+        "Department of Computer Engineering"
+      ],
+      "FoCIS": [
+        "Computer Science Department",
+        "Information Technology Department",
+        "Information Systems Department",
+        "Mobile and Pervasive Computing Department"
+      ],
+      "GCTU_Business": [
+        "Management Studies Department",
+        "Economic Department",
+        "Marketing Department",
+        "Procurement and Logistics Department",
+        "Accounting, Banking and Finance Department"
+      ]
+    };
+
+    const facultySelect = document.getElementById("faculty");
+    const departmentSelect = document.getElementById("department");
+
+    facultySelect.addEventListener("change", function () {
+      const selected = facultySelect.options[facultySelect.selectedIndex].textContent;
+      departmentSelect.innerHTML = '<option value="">Select Department</option>';
+
+      const departmentNames = facultyToDepartments[this.value] || [];
+      Array.from(departmentSelect.options).forEach(option => {
+        if (option.value === "") return; // keep the first option
+        option.remove();
+      });
+
+      departmentNames.forEach(name => {
+        Array.from(departmentSelect.options).forEach(opt => {
+          if (opt.textContent === name) return;
+        });
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        departmentSelect.appendChild(opt);
+      });
+    });
+
+
+ document.getElementById("faculty").addEventListener("change", function () {
+    var selectedFaculty = this.value;
+    var departmentSelect = document.getElementById("department");
+
+    // Clear previous options
+    departmentSelect.innerHTML = '<option value="" disabled selected>- Select your department -</option>';
+
+    // Faculty → Departments map
+    var departments = {
+      "FoE": [
+        "Telecommunications Engineering Department",
+        "Electrical and Electronics Engineering Department",
+        "Mathematics and Statistics Department",
+        "Department of Computer Engineering"
+      ],
+      "FoCIS": [
+        "Computer Science Department",
+        "Information Technology Department",
+        "Information Systems Department",
+        "Mobile and Pervasive Computing Department"
+      ],
+      "GCTU_Business": [
+        "Management Studies Department",
+        "Economic Department",
+        "Marketing Department",
+        "Procurement and Logistics Department",
+        "Accounting, Banking and Finance Department"
+      ]
+    };
+
+    // Populate departments
+    if (departments[selectedFaculty]) {
+      departments[selectedFaculty].forEach(function (dept) {
+        var option = document.createElement("option");
+        option.value = dept;
+        option.textContent = dept;
+        departmentSelect.appendChild(option);
+      });
+    }
+  });    
+  </script>
+</body>
+</html>

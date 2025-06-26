@@ -18,6 +18,70 @@
             line-height: 1.6;
         }
 
+        /* Navigation Bar Styles */
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        .navbar-brand {
+            font-size: 20px;
+            font-weight: 600;
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .navbar-menu {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .navbar-link {
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .navbar-link:hover {
+            color: #3b82f6;
+            background: #f1f5f9;
+        }
+
+        .logout-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .logout-btn:hover {
+            background: #b91c1c;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -107,6 +171,15 @@
             color: #64748b;
             font-size: 14px;
         }
+
+        .time-urgent {
+            color: red;
+            font-weight: bold;
+        }
+        .time-normal {
+            color: green;
+        }
+
 
         .quiz-table td {
             padding: 16px 0;
@@ -301,6 +374,10 @@
             padding: 16px 0;
         }
 
+        a{
+            text-decoration: none;
+        }
+
         .announcement-icon {
             background: #3b82f6;
             color: white;
@@ -319,6 +396,16 @@
             font-size: 14px;
         }
 
+        /* Mobile Menu Styles */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #64748b;
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -329,29 +416,71 @@
                 gap: 16px;
                 align-items: stretch;
             }
+
+            .navbar-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                border-top: 1px solid #e2e8f0;
+                flex-direction: column;
+                padding: 20px;
+                gap: 12px;
+            }
+
+            .navbar-menu.active {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .navbar-content {
+                padding: 0 20px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="#" class="navbar-brand">Student Portal</a>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+            <div class="navbar-menu" id="navbarMenu">
+                <a href="#" class="navbar-link">Dashboard</a>
+                <a href="{% url 'quiz_list' %}" class="navbar-link">All Quizzes</a>
+                <a href="#" class="navbar-link">Results</a>
+                <a href="#" class="navbar-link">Profile</a>
+                <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+            </div>
+        </div>
+    </nav>
+
     <div class="container">
         <div class="header">
             <div class="welcome-section">
-                <h1>Welcome back, Alex Johnson <span class="wave">👋</span></h1>
+                <h1>Welcome back, {{ user.first_name}} <span class="wave">👋</span></h1>
                 <div class="student-info">
-                    Faculty: FoCIS &nbsp;&nbsp; Department: Computer Science<br>
-                    Level: 200 &nbsp;&nbsp; GCTU-ST-01234
+                    Faculty: {{request.user.studentprofile.faculty}} &nbsp;&nbsp; Department: {{request.user.studentprofile.department}}<br>
+                    Level: {{request.user.studentprofile.level}} &nbsp;&nbsp; {{request.user.username}}
                 </div>
             </div>
-            <button class="take-quiz-btn" onclick="takeQuiz()">Take Quiz</button>
+            <!--<a href="#" class="take-quiz-btn">Take Quiz</a>-->
         </div>
 
+        {% if in_progress_attempt %}
         <div class="current-quiz-alert">
             <div style="display: flex; align-items: center;">
                 <span class="icon">✏️</span>
-                <span>You are currently attempting CS202 Quiz 1</span>
+                <span>You are currently attempting {{ in_progress_attempt.quiz.course.code }} - {{ in_progress_attempt.quiz.title }}</span>
             </div>
-            <button class="resume-btn" onclick="resumeQuiz()">Resume</button>
+            <button class="resume-btn" onclick="location.href='#'">Resume</button>
         </div>
+        {% endif %}
 
         <div class="main-content">
             <div class="left-section">
@@ -367,29 +496,49 @@
                             </tr>
                         </thead>
                         <tbody>
+                             {% if messages %}
+                              {% for message in messages %}
+                                {% if message.tags == 'error' %}
+                                  <div class="alert alert-danger">
+                                {% else %}
+                                  <div class="alert alert-{{ message.tags }}">
+                                {% endif %}
+                                    {{ message }}
+                                  </div>
+                              {% endfor %}
+                            {% endif %}
+                            {% for quiz in quizzes|slice:":3" %}
                             <tr>
-                                <td>CS202</td>
-                                <td>Data Structures</td>
-                                <td class="time-normal">3 days</td>
-                                <td><button class="view-btn" onclick="viewQuiz('CS202')">View</button></td>
+                                <td>{{ quiz.course_code }}</td>
+                                <td>{{ quiz.title }}</td>
+                                <td class="{% if quiz.urgent %}time-urgent{% else %}time-normal{% endif %}">
+                                    {% if quiz.time_left.days > 0 %}
+                                        {{ quiz.time_left.days }} day{{ quiz.time_left.days|pluralize }}
+                                    {% elif quiz.time_left.seconds >= 3600 %}
+                                        {{ quiz.time_left.seconds|divisibleby:3600 }} hour{{ quiz.time_left.seconds|divisibleby:3600|pluralize }}
+                                    {% else %}
+                                        {{ quiz.time_left.seconds|divisibleby:60 }} minute{{ quiz.time_left.seconds|divisibleby:60|pluralize }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if quiz.id %}
+                                        <a href="{% url 'quiz_instructions' quiz.id %}" class="view-btn">Take View</a>
+                                    {% else %}
+                                        <span class="text-danger">Invalid Link</span>
+                                    {% endif %}
+                                </td>
                             </tr>
-                            <tr>
-                                <td>CS305</td>
-                                <td>Algorithms</td>
-                                <td class="time-urgent">2 hours</td>
-                                <td><button class="view-btn" onclick="viewQuiz('CS305')">View</button></td>
-                            </tr>
-                            <tr>
-                                <td>IS210</td>
-                                <td>Database Systems</td>
-                                <td class="time-normal">5 days</td>
-                                <td><button class="view-btn" onclick="viewQuiz('IS210')">View</button></td>
-                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4">No upcoming quizzes</td></tr>
+                            {% endfor %}
                         </tbody>
                     </table>
+
+                    {% if quizzes|length > 3 %}
                     <div class="see-all-link">
-                        <a href="#" onclick="seeAllQuizzes()">See All Quizzes</a>
+                        <a href="{% url 'quiz_list' %}">See All Quizzes</a>
                     </div>
+                    {% endif %}
                 </div>
 
                 <div class="card">
@@ -397,28 +546,37 @@
                     <table class="results-table">
                         <thead>
                             <tr>
-                                <th></th>
-                                <th></th>
+                                <th>Quiz Title</th>
+                                <th>Course</th>
                                 <th>Score</th>
                                 <th>Status</th>
                                 <th>Date</th>
                             </tr>
                         </thead>
                         <tbody>
+                            {% for attempt in past_attempts %}
                             <tr>
-                                <td>Quiz 1</td>
-                                <td>CS101</td>
-                                <td class="score-good">85%</td>
+                                <td>{{ attempt.quiz.title }}</td>
+                                <td>{{ attempt.quiz.course.code }}</td>
+                                <td class="
+                                    {% if attempt.score >= 80 %}
+                                        score-good
+                                    {% elif attempt.score >= 60 %}
+                                        score-average
+                                    {% else %}
+                                        score-low
+                                    {% endif %}
+                                ">
+                                    {{ attempt.score }}%
+                                </td>
                                 <td><span class="status-completed">Completed</span></td>
-                                <td>June 15</td>
+                                <td>{{ attempt.completed_at|date:"M d" }}</td>
                             </tr>
+                            {% empty %}
                             <tr>
-                                <td>Midterm Quiz</td>
-                                <td>IT202</td>
-                                <td class="score-average">70%</td>
-                                <td><span class="status-completed">Completed</span></td>
-                                <td>May 28</td>
+                                <td colspan="5">You haven't completed any quizzes yet.</td>
                             </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -426,26 +584,38 @@
 
             <div class="right-section">
                 <div class="card profile-card">
-                    <div class="avatar">AJ</div>
-                    <div class="profile-name">Alex Johnson</div>
-                    <div class="profile-email">alex.johnson@example.com</div>
-                    <div class="profile-details">
-                        <div><strong>Student ID:</strong> GCTU-ST-01234</div>
-                        <div><strong>Faculty:</strong> FoCIS</div>
-                        <div><strong>Department:</strong> Computer Science</div>
-                        <div><strong>Level:</strong> 200</div>
+                    <div class="avatar">
+                        {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="{{ user.get_full_name }}" class="avatar-img">
+                    {% else %}
+                        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                    {% endif %}
                     </div>
-                    <button class="edit-profile-btn" onclick="editProfile()">Edit Profile</button>
+                    <div class="profile-name">{{request.user.full_name}}</div>
+                    <div class="profile-email">{{request.user.email}}</div>
+                    <div class="profile-details">
+                        <div><strong>Student ID:</strong> {{request.user.username}}</div>
+                        <div><strong>Faculty:</strong> {{request.user.studentprofile.faculty}}</div>
+                        <div><strong>Department:</strong> {{request.user.studentprofile.department}}</div>
+                        <div><strong>Level:</strong> {{request.user.studentprofile.level}}</div>
+                    </div>
+                    <button class="edit-profile-btn">Edit Profile</button>
                 </div>
 
                 <div class="card">
                     <h2>Announcements</h2>
+                    {% if announcement_quiz %}
                     <div class="announcement">
                         <div class="announcement-icon">🔔</div>
                         <div class="announcement-text">
-                            Quiz for CS302 will start at 10:00 AM tomorrow.
+                            Quiz for {{ announcement_quiz.course_code }} ({{ announcement_quiz.title }}) will start at {{ announcement_quiz.start_time|date:"h:i A" }} on {{ announcement_quiz.start_time|date:"F j" }}.
                         </div>
                     </div>
+                    {% else %}
+                    <div class="announcement-text">
+                        No announcements at the moment.
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -470,6 +640,11 @@
 
         function editProfile() {
             alert('Opening profile editor...');
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('navbarMenu');
+            menu.classList.toggle('active');
         }
 
         // Add some interactivity

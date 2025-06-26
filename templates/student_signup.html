@@ -61,6 +61,65 @@
         </div>
 
         <div class="form-group">
+          <label for="faculty">Faculty <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <select id="faculty" name="faculty" required>
+              <option value="" disabled selected>- Select your faculty -</option>
+              {% for faculty in faculties %}
+                <option value="{{ faculty.id }}">{{ faculty.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="error-message" id="facultyError">Please select your falculty</div>
+        </div>
+
+        <div class="form-group">
+          <label for="department">Department <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <select id="department" name="department" required>
+              <option value="" disabled selected>--Select your department--</option>
+            </select>
+          </div>
+          <div class="error-message" id="departmentError">Please select your department</div>
+        </div>
+
+
+
+        <div class="form-group">
+          <label for="indexNumber">Programme <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="text" id="indexNumber" name="programme" placeholder="BSc. Computer Sceince" required>
+            <div class="input-icon">🎓</div>
+          </div>
+          <div class="error-message" id="indexError">Please enter a valid GCTU index number (Format: 1674557635)</div>
+        </div>
+
+
+        <div class="form-group">
+          <label for="indexNumber">Level <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="text" id="indexNumber" name="level" placeholder="100" required>
+            <div class="input-icon">🎓</div>
+          </div>
+          <div class="error-message" id="indexError">Please enter a valid GCTU index number (Format: 1674557635)</div>
+        </div>
+
+        <div class="form-group">
+          <label for="indexNumber">Session <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="text" id="Session" name="session" placeholder="Morning                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         " required>
+            <div class="input-icon">🎓</div>
+          </div>
+          <div class="error-message" id="indexError">Please enter a valid GCTU index number (Format: 1674557635)</div>
+        </div>
+
+
+        
+        
+
+        
+
+        <div class="form-group">
           <label for="password">Password <span class="required">*</span></label>
           <div class="input-wrapper">
             <input type="password" id="password" name="password" placeholder="Create a strong password" required minlength="8">
@@ -93,6 +152,36 @@
     </div>
 
     <script>
+      function loadDepartments(facultyId) {
+  const departmentSelect = document.getElementById("department");
+
+  // Clear previous options
+  departmentSelect.innerHTML = '<option value="" disabled selected>- Select your department -</option>';
+
+  if (!facultyId) return;
+
+  fetch(`/get-departments/${facultyId}/`)
+    .then(response => response.json())
+    .then(data => {
+      data.departments.forEach(dept => {
+        const option = document.createElement("option");
+        option.value = dept.id;
+        option.textContent = dept.name;
+        departmentSelect.appendChild(option);
+      });
+    })
+    .catch(error => {
+      console.error('Failed to load departments:', error);
+    });
+}
+
+// Attach the event listener AFTER the function is defined
+document.getElementById("faculty").addEventListener("change", function () {
+  const selectedFaculty = this.value;
+  loadDepartments(selectedFaculty);  // ✅ Now we call the function properly
+});
+
+
   const inputs = {
     name: document.getElementById('name'),
     email: document.getElementById('email'),

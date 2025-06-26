@@ -496,7 +496,7 @@
                 </div>
 
                 <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="createQuiz()">Create Quiz</button>
+                    <a class="btn btn-primary" href="{% url 'create_quiz' %}">Create Quiz</a>
                     <button class="btn btn-secondary" onclick="addQuestion()">Add Question to Bank</button>
                     <button class="btn btn-outline" onclick="viewResults()">View Quiz Results</button>
                     <button class="btn btn-outline" onclick="viewCourse()">View Course</button>
@@ -546,32 +546,42 @@
                 </div>
                 
                 <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Attempts</th>
-                            <th>Duration</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Quiz 1</strong></td>
-                            <td>75</td>
-                            <td>45 mins</td>
-                            <td><span class="status-badge status-active">Active</span></td>
-                            <td><button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.75rem;" onclick="editQuiz('Quiz 1')">Edit</button></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Midterm Exam</strong></td>
-                            <td>51</td>
-                            <td>60 mins</td>
-                            <td><span class="status-badge status-active">Active</span></td>
-                            <td><button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.75rem;" onclick="editQuiz('Midterm Exam')">Edit</button></td>
-                        </tr>
-                    </tbody>
-                </table>
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Attempts</th>
+            <th>Duration</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for quiz in quizes %}
+        <tr>
+            <td><strong>{{ quiz.title }}</strong></td>
+            <td>{{ quiz.allowed_attempts }}</td>
+            <td>{{ quiz.duration_minutes }}</td>
+            <td>
+                {% if quiz.status == 'active' %}
+                    <span class="status-badge status-active">Active</span>
+                {% elif quiz.status == 'completed' %}
+                    <span class="status-badge status-completed">Completed</span>
+                {% else %}
+                    <span class="status-badge status-onhold">On hold</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if quiz.status == 'completed' %}
+                    <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.75rem;">View</button>
+                {% else %}
+                    <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.75rem;">Edit</button>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
             </div>
 
             <!-- Question Bank -->

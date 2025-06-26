@@ -32,7 +32,7 @@
         left: 0;
         width: 100%;
         height: 4px;
-        background: linear-gradient(to right, #ce1126 0%, #ce1126 33%, #fcd116 33%, #fcd116 66%, #006b3f 66%, #006b3f 100%);
+        /*background: linear-gradient(to right, #ce1126 0%, #ce1126 33%, #fcd116 33%, #fcd116 66%, #006b3f 66%, #006b3f 100%);*/
         z-index: 1000;
       }
 
@@ -423,6 +423,17 @@
 
       <form id="staffRegistrationForm" action="{% url 'register_staff' %}" method="POST">
         {% csrf_token %}
+        {% if messages %}
+              {% for message in messages %}
+                {% if message.tags == 'error' %}
+                  <div class="alert alert-danger">
+                {% else %}
+                  <div class="alert alert-{{ message.tags }}">
+                {% endif %}
+                    {{ message }}
+                  </div>
+              {% endfor %}
+            {% endif %}
         
         <div class="form-group">
           <label for="fullName">Full Name <span class="required">*</span></label>
@@ -447,9 +458,9 @@
           <div class="input-wrapper">
             <select id="faculty" name="faculty" required>
               <option value="" disabled selected>- Select your faculty -</option>
-              <option value="FoE">Faculty of Engineering (FoE)</option>
-              <option value="FoCIS">Faculty of Computing and Information Systems (FoCIS)</option>
-              <option value="GCTU_Business">GCTU Business School</option>
+              {% for faculty in faculties %}
+                <option value="{{ faculty.id }}">{{ faculty.name }}</option>
+              {% endfor %}
             </select>
           </div>
           <div class="error-message" id="facultyError">Please select your falculty</div>
@@ -518,7 +529,7 @@
         </button>
         
         <div class="login-link">
-          Already have an account? <a href=".">Sign in to Staff Portal</a>
+          Already have an account? <a href="{% url 'login' %}">Sign in to Staff Portal</a>
         </div>
       </form>
     </div>
@@ -528,6 +539,37 @@
   const submitBtn = document.getElementById('submitBtn');
   const loading = document.getElementById('loading');
   const submitText = document.getElementById('submitText');
+
+  // Define this function at the top level (outside any other functions)
+function loadDepartments(facultyId) {
+  const departmentSelect = document.getElementById("department");
+
+  // Clear previous options
+  departmentSelect.innerHTML = '<option value="" disabled selected>- Select your department -</option>';
+
+  if (!facultyId) return;
+
+  fetch(`/get-departments/${facultyId}/`)
+    .then(response => response.json())
+    .then(data => {
+      data.departments.forEach(dept => {
+        const option = document.createElement("option");
+        option.value = dept.id;
+        option.textContent = dept.name;
+        departmentSelect.appendChild(option);
+      });
+    })
+    .catch(error => {
+      console.error('Failed to load departments:', error);
+    });
+}
+
+// Attach the event listener AFTER the function is defined
+document.getElementById("faculty").addEventListener("change", function () {
+  const selectedFaculty = this.value;
+  loadDepartments(selectedFaculty);  // ✅ Now we call the function properly
+});
+
 
   // Form validation and enhancement
   const inputs = {
@@ -679,7 +721,7 @@
         if (warningDiv.parentNode) warningDiv.remove();
       }, 3000);
     }
-  }); */
+  }); 
 
   // Faculty -> Department dropdown linkage
   document.getElementById("faculty").addEventListener("change", function () {
@@ -721,7 +763,7 @@
         departmentSelect.appendChild(option);
       });
     }
-  });
+  });*/
 </script>
     </script>
   </body>

@@ -38,8 +38,8 @@ class CustomUser(AbstractUser):
     username = models.CharField(max_length=150, unique=True, blank=True, null=True)
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
 
-    USERNAME_FIELD = 'username'  # Use username for login
-    REQUIRED_FIELDS = ['email','user_type']  # Add any other required fields here
+    USERNAME_FIELD = 'username' 
+    REQUIRED_FIELDS = ['email','user_type']  
 
     objects = CustomUserManager()
 
@@ -96,6 +96,7 @@ class StudentProfile(models.Model):
     level = models.CharField(max_length=10, blank=True,choices=LEVEL_CHOICES, default='100')
     group = models.CharField(max_length=5, blank=True,choices=GROUP_CHOICES)
     session = models.CharField(max_length=20, blank=True)
+    programme = models.CharField(max_length=100, blank=True)                                                                                                                                                                                                
 
 
     def __str__(self):
@@ -117,7 +118,7 @@ class StaffProfile(models.Model):
 
 
 class Semester(models.Model):
-    name = models.CharField(max_length=50, unique=True)  # e.g., "2024/2025 - Semester 1"
+    name = models.CharField(max_length=50, unique=True)  
     start_date = models.DateField()
     end_date = models.DateField()
 
@@ -131,7 +132,7 @@ class AssignedCourse(models.Model):
     semester = models.ForeignKey('Semester', on_delete=models.CASCADE)
 
     class Meta:
-        unique_together = ('staff', 'course', 'semester')  # Prevent duplicates
+        unique_together = ('staff', 'course', 'semester')  
 
     def __str__(self):
         return f"{self.staff.user.get_full_name()} → {self.course.code} ({self.semester.name})"
@@ -159,7 +160,7 @@ class Course(models.Model):
 
 class QuestionBank(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    is_general = models.BooleanField(default=True)  # True = general, False = personal
+    is_general = models.BooleanField(default=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -189,13 +190,13 @@ class Question(models.Model):
     text = models.TextField()
     option_a = models.CharField(max_length=300)
     option_b = models.CharField(max_length=300)
-    option_c = models.CharField(max_length=300, blank=True, null=True)  # optional third option
-    option_d = models.CharField(max_length=300, blank=True, null=True)  # optional fourth option
+    option_c = models.CharField(max_length=300, blank=True, null=True) 
+    option_d = models.CharField(max_length=300, blank=True, null=True)  
     correct_option = models.CharField(
         max_length=1,
         choices=[('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')]
     )
-    tag = models.CharField(max_length=100, blank=True, null=True)  # optional topic tag
+    tag = models.CharField(max_length=100, blank=True, null=True)  
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -238,9 +239,18 @@ class Quiz(models.Model):
     randomize_options = models.BooleanField(default=False)
     visibility_to_students = models.BooleanField(default=True)
     session = models.CharField(max_length=20, blank=True)
-    groups = models.CharField(max_length=100, blank=True, choices=GROUP_CHOICES)  # Comma-separated list of groups allowed to take the quiz
+    groups = models.CharField(max_length=100, blank=True, choices=GROUP_CHOICES) 
     is_open = models.BooleanField(default=True)
-    additional_info = models.TextField(blank=True, null=True)  # For any extra instructions or notes
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('active', 'Active'),
+            ('completed', 'Completed'),
+            ('onhold', 'Onhold')
+        ],
+        default='active'
+    )
+    additional_info = models.TextField(blank=True, null=True) 
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -302,9 +312,17 @@ class GoogleSheetQuiz(models.Model):
 class SheetTask(models.Model):
     course = models.ForeignKey('Course', on_delete=models.CASCADE)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    shared_with = models.ManyToManyField(StaffProfile, blank=True)  # ✅ Add this
+    shared_with = models.ManyToManyField(StaffProfile, blank=True)  
     sheet_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.course.code} - {self.course.title} [{self.course.department.name}]"
+
+
+class StudentQuizQuestion(models.Model):
+    attempt = models.ForeignKey('QuizAttempt', on_delete=models.CASCADE)
+    question = models.ForeignKey('Question', on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('attempt', 'question')

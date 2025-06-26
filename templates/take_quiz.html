@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ quiz.title }} Instructions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Basic styling -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 650px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .info-list {
+            list-style: none;
+            padding: 0;
+        }
+        .info-list li {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .instructions {
+            background: #e8f4fc;
+            padding: 15px;
+            border-left: 5px solid #2196f3;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .btn-start {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn-start:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>{{ quiz.title }}</h2>
+
+    <ul class="info-list">
+        <li><strong>Course:</strong> {{ quiz.course.code }} - {{ quiz.course.title }}</li>
+        <li><strong>Duration:</strong> {{ quiz.duration_minutes }} minute{{ quiz.duration_minutes|pluralize }}</li>
+        <li><strong>Attempts Allowed:</strong> {{ quiz.allowed_attempts }}</li>
+        <li><strong>Attempts Used:</strong> {{ attempts_used }}</li>
+        <li><strong>Start Time:</strong> {{ quiz.start_time|date:"M d, Y H:i" }}</li>
+        <li><strong>End Time:</strong> {{ quiz.end_time|date:"M d, Y H:i" }}</li>
+    </ul>
+
+    {% if quiz.additional_info %}
+    <div class="instructions">
+        <strong>📌 Instructions:</strong>
+        <p>{{ quiz.additional_info }}</p>
+    </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'start_quiz' quiz.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-start">🚀 Start Quiz</button>
+    </form>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Quiz - Staff Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(30, 41, 59, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-section {
+            margin-bottom: 35px;
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+
+        .section-title {
+            color: #1e293b;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-icon {
+            width: 24px;
+            height: 24px;
+            background: #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-row.single {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            color: #1e293b;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .required {
+            color: #ef4444;
+        }
+
+        input, select, textarea {
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            border-color: #3b82f6;
+            background: #f0f7ff;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .help-text {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #64748b;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-outline:hover {
+            background: #f8fafc;
+            border-color: #64748b;
+        }
+
+        .datetime-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .preview-section {
+            background: #f0f7ff;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .preview-section.active {
+            display: block;
+        }
+
+        .quiz-preview {
+            color: #1e293b;
+        }
+
+        .quiz-preview h3 {
+            color: #3b82f6;
+            margin-bottom: 15px;
+        }
+
+        .quiz-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: #64748b;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        @media (max-width: 768px) {
+            .form-row, .datetime-row, .checkbox-group, .quiz-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Create New Quiz</h1>
+            <p>Design and configure a new quiz for your students</p>
+        </div>
+
+        <div class="form-container">
+            <form id="quizForm" method="post" action="{% url 'create_quiz' %}">
+                {% csrf_token %}
+                <!-- Basic Information Section -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <span class="section-icon">1</span>
+                        Basic Information
+                    </h2>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="course">Course <span class="required">*</span></label>
+                            <select id="course" name="course" required>
+                                <option value="">Select Course</option>
+                                {% for course in courses %}
+                                <option value="{{course.code}}">{{course.title}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="title">Quiz Title <span class="required">*</span></label>
+                            <input type="text" id="title" name="title" maxlength="100" required 
+                                   placeholder="e.g., Midterm Exam - Chapter 1-5">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="source_bank">Question Bank <span class="required">*</span></label>
+                            <select id="source_bank" name="source_bank" required onchange="toggleBankOptions()">
+                                <option value="">Select Question Bank</option>
+                                <option value="general">General</option>
+                                <option value="private">Private/Personal</option>
+                                <option value="other_staff">Other Staff</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Private Bank Selection -->
+                        <div class="form-group" id="privateBankGroup" style="display: none;">
+                            <label for="private_bank">Select Private Bank <span class="required">*</span></label>
+                            <select name="private_bank">
+                                {% for bank in private_banks %}
+                                    <option value="{{ bank.id }}">{{ bank.name }}</option>
+                                {% endfor %}
+                            </select>
+
+                        </div>
+                        
+                        <!-- Staff Bank Selection -->
+                        <div class="form-group" id="staffBankGroup" style="display: none;">
+                            <label for="staff_bank">Select Staff Member <span class="required">*</span></label>
+                            <select id="staff_bank" name="staff_bank">
+                                <option value="">Choose staff member</option>
+                                <option value="staff_1">Dr. John Smith</option>
+                                <option value="staff_2">Prof. Sarah Johnson</option>
+                                <option value="staff_3">Dr. Michael Brown</option>
+                                <option value="staff_4">Prof. Emily Davis</option>
+                                <option value="staff_5">Dr. Robert Wilson</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="session">Academic Session</label>
+                            <input type="text" id="session" name="session" maxlength="20" 
+                                   placeholder="e.g., 2024/2025">
+                        </div>
+                    </div>
+
+                    <div class="form-row single">
+                        <div class="form-group">
+                            <label for="additional_info">Additional Instructions</label>
+                            <textarea id="additional_info" name="additional_info" 
+                                    placeholder="Any special instructions or notes for students..."></textarea>
+                            <div class="help-text">Optional: Provide any extra information students should know before taking the quiz</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Configuration Section -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <span class="section-icon">2</span>
+                        Quiz Configuration
+                    </h2>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="number_of_questions">Number of Questions <span class="required">*</span></label>
+                            <input type="number" id="number_of_questions" name="number_of_questions" 
+                                   min="1" max="100" required placeholder="e.g., 20">
+                            <div class="help-text">Questions will be randomly selected from the question bank</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="duration_minutes">Duration (Minutes) <span class="required">*</span></label>
+                            <input type="number" id="duration_minutes" name="duration_minutes" 
+                                   min="1" max="300" required placeholder="e.g., 60">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="student_type">Student Type <span class="required">*</span></label>
+                            <select id="student_type" name="student_type" required>
+                                <option value="">Select Student Type</option>
+                                <option value="all">All Student Types</option>
+                                <option value="regular">Regular Students</option>
+                                <option value="evening">Evening Students</option>
+                                <option value="weekend">Weekend Students</option>
+                            </select>
+                            <div class="help-text">Choose the type of students this quiz is intended for</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="allowed_attempts">Allowed Attempts <span class="required">*</span></label>
+                            <input type="number" id="allowed_attempts" name="allowed_attempts" 
+                                   min="1" max="10" value="1" required>
+                            <div class="help-text">Number of times a student can take this quiz</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row single">
+                        <div class="form-group">
+                            <label>Student Groups</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="group_all" name="groups" value="ALL">
+                                    <label for="group_all">All Groups</label>
+                                </div>
+                                
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="group_a" name="groups" value="GROUP_A">
+                                    <label for="group_a">Group A</label>
+                                </div>
+                                
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="group_b" name="groups" value="GROUP_B">
+                                    <label for="group_b">Group B</label>
+                                </div>
+                                
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="group_c" name="groups" value="GROUP_C">
+                                    <label for="group_c">Group C</label>
+                                </div>
+                            </div>
+                            <div class="help-text">Select which student groups can access this quiz</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Schedule Section -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <span class="section-icon">3</span>
+                        Quiz Schedule
+                    </h2>
+                    
+                    <div class="datetime-row">
+                        <div class="form-group">
+                            <label for="start_time">Start Date & Time <span class="required">*</span></label>
+                            <input type="datetime-local" id="start_time" name="start_time" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="end_time">End Date & Time <span class="required">*</span></label>
+                            <input type="datetime-local" id="end_time" name="end_time" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Display & Behavior Settings -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <span class="section-icon">4</span>
+                        Display & Behavior Settings
+                    </h2>
+                    
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="show_results_immediately" name="show_results_immediately" checked>
+                            <label for="show_results_immediately">Show Results Immediately</label>
+                        </div>
+                        
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="show_correct_wrong" name="show_correct_wrong" checked>
+                            <label for="show_correct_wrong">Show Correct/Wrong Answers</label>
+                        </div>
+                        
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="randomize_questions" name="randomize_questions" checked>
+                            <label for="randomize_questions">Randomize Question Order</label>
+                        </div>
+                        
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="randomize_options" name="randomize_options">
+                            <label for="randomize_options">Randomize Answer Options</label>
+                        </div>
+                        
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="visibility_to_students" name="visibility_to_students" checked>
+                            <label for="visibility_to_students">Visible to Students</label>
+                        </div>
+                        
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="is_open" name="is_open" checked>
+                            <label for="is_open">Quiz is Open</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview Section -->
+                <div class="preview-section" id="previewSection">
+                    <h3>Quiz Preview</h3>
+                    <div id="quizPreview" class="quiz-preview">
+                        <!-- Preview content will be generated here -->
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="button-group">
+                    <div>
+                        <button type="button" class="btn btn-outline" onclick="previewQuiz()">Preview Quiz</button>
+                    </div>
+                    <div style="display: flex; gap: 15px;">
+                        <button type="button" class="btn btn-secondary">Save as Draft</button>
+                        <button type="submit" class="btn btn-primary">Create Quiz</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Toggle question bank options based on selection
+        function toggleBankOptions() {
+            const sourceBankSelect = document.getElementById('source_bank');
+            const privateBankGroup = document.getElementById('privateBankGroup');
+            const staffBankGroup = document.getElementById('staffBankGroup');
+            const privateBankSelect = document.getElementById('private_bank');
+            const staffBankSelect = document.getElementById('staff_bank');
+            
+            // Hide all conditional groups first
+            privateBankGroup.style.display = 'none';
+            staffBankGroup.style.display = 'none';
+            
+            // Remove required attribute from hidden fields
+            privateBankSelect.removeAttribute('required');
+            staffBankSelect.removeAttribute('required');
+            
+            // Clear values
+            privateBankSelect.value = '';
+            staffBankSelect.value = '';
+            
+            // Show appropriate group based on selection
+            if (sourceBankSelect.value === 'private') {
+                privateBankGroup.style.display = 'block';
+                privateBankSelect.setAttribute('required', 'required');
+            } else if (sourceBankSelect.value === 'other_staff') {
+                staffBankGroup.style.display = 'block';
+                staffBankSelect.setAttribute('required', 'required');
+            }
+        }
+
+        // Handle "All Groups" checkbox logic
+        function handleGroupSelection() {
+            const allGroupsCheckbox = document.getElementById('group_all');
+            const individualGroupCheckboxes = document.querySelectorAll('input[name="groups"]:not(#group_all)');
+            
+            allGroupsCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    individualGroupCheckboxes.forEach(checkbox => {
+                        checkbox.checked = false;
+                        checkbox.disabled = true;
+                    });
+                } else {
+                    individualGroupCheckboxes.forEach(checkbox => {
+                        checkbox.disabled = false;
+                    });
+                }
+            });
+            
+            individualGroupCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    if (this.checked && allGroupsCheckbox.checked) {
+                        allGroupsCheckbox.checked = false;
+                        individualGroupCheckboxes.forEach(cb => {
+                            cb.disabled = false;
+                        });
+                    }
+                });
+            });
+        }
+
+        // Set minimum datetime to current time
+        function setMinDateTime() {
+            const now = new Date();
+            const formatted = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            document.getElementById('start_time').min = formatted;
+            document.getElementById('end_time').min = formatted;
+        }
+
+        // Validate end time is after start time
+        function validateDateTime() {
+            const startTime = document.getElementById('start_time').value;
+            const endTime = document.getElementById('end_time').value;
+            
+            if (startTime && endTime && startTime >= endTime) {
+                alert('End time must be after start time');
+                document.getElementById('end_time').value = '';
+            }
+        }
+
+        // Preview quiz functionality
+        function previewQuiz() {
+            const form = document.getElementById('quizForm');
+            const formData = new FormData(form);
+            const previewSection = document.getElementById('previewSection');
+            const previewContent = document.getElementById('quizPreview');
+            
+            // Get form values
+            const course = form.course.options[form.course.selectedIndex]?.text || 'Not selected';
+            const title = formData.get('title') || 'Untitled Quiz';
+            const questions = formData.get('number_of_questions') || '0';
+            const duration = formData.get('duration_minutes') || '0';
+            const attempts = formData.get('allowed_attempts') || '1';
+            const studentType = form.student_type.options[form.student_type.selectedIndex]?.text || 'Not selected';
+            const startTime = formData.get('start_time') || 'Not set';
+            const endTime = formData.get('end_time') || 'Not set';
+            
+            // Get selected groups
+            const selectedGroups = Array.from(document.querySelectorAll('input[name="groups"]:checked'))
+                .map(checkbox => {
+                    const label = document.querySelector(`label[for="${checkbox.id}"]`);
+                    return label ? label.textContent : checkbox.value;
+                });
+            const groupsText = selectedGroups.length > 0 ? selectedGroups.join(', ') : 'None selected';
+            
+            // Get question bank info
+            let questionBank = 'Not selected';
+            if (form.source_bank.value === 'general') {
+                questionBank = 'General';
+            } else if (form.source_bank.value === 'private') {
+                const privateBankText = form.private_bank.options[form.private_bank.selectedIndex]?.text;
+                questionBank = privateBankText || 'Private (not selected)';
+            } else if (form.source_bank.value === 'other_staff') {
+                const staffBankText = form.staff_bank.options[form.staff_bank.selectedIndex]?.text;
+                questionBank = staffBankText ? `Staff: ${staffBankText}` : 'Other Staff (not selected)';
+            }
+            
+            // Generate preview HTML
+            previewContent.innerHTML = `
+                <div class="quiz-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Course:</span>
+                        <span class="detail-value">${course}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Title:</span>
+                        <span class="detail-value">${title}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Question Bank:</span>
+                        <span class="detail-value">${questionBank}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Questions:</span>
+                        <span class="detail-value">${questions}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Student Type:</span>
+                        <span class="detail-value">${studentType}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Duration:</span>
+                        <span class="detail-value">${duration} minutes</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Attempts:</span>
+                        <span class="detail-value">${attempts}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Groups:</span>
+                        <span class="detail-value">${groupsText}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Start Time:</span>
+                        <span class="detail-value">${new Date(startTime).toLocaleString() || 'Not set'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">End Time:</span>
+                        <span class="detail-value">${new Date(endTime).toLocaleString() || 'Not set'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Randomized:</span>
+                        <span class="detail-value">${formData.get('randomize_questions') ? 'Yes' : 'No'}</span>
+                    </div>
+                </div>
+            `;
+            
+            previewSection.classList.add('active');
+            previewSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        
+
+        // Event listeners
+        document.getElementById('start_time').addEventListener('change', validateDateTime);
+        document.getElementById('end_time').addEventListener('change', validateDateTime);
+
+        // Initialize
+        setMinDateTime();
+        handleGroupSelection();
+    </script>
+</body>
+</html>

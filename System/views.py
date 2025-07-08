@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from .forms import *
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
@@ -305,104 +305,122 @@ def login_view(request):
         input_value = request.POST.get("username").strip()
         password = request.POST.get("password")
 
-        print("🔍 Login attempt")
-        print(f"👉 Input: {input_value}")
-        print(f"👉 Password provided: {'Yes' if password else 'No'}")
+        print("Login attempt")
+        print(f"Input: {input_value}")
+        print(f"Password provided: {'Yes' if password else 'No'}")
 
         user = None
 
         # Try to find user by email (staff login)
         try:
             user = CustomUser.objects.get(email=input_value)
-            print("✅ Found user by email:", user)
+            print("Found user by email:", user)
         except CustomUser.DoesNotExist:
-            print("❌ No user found with that email")
+            print("No user found with that email")
 
         # Try to find user by student index number (student login)
         if user is None:
             try:
                 student_profile = StudentProfile.objects.get(student_id=input_value)
                 user = student_profile.user
-                print("✅ Found student user by index number:", user)
+                print("Found student user by index number:", user)
             except StudentProfile.DoesNotExist:
-                print("❌ No student found with index number:", input_value)
+                print("No student found with index number:", input_value)
 
         # Attempt authentication
         if user:
             username = user.username or user.email
-            print("🔐 Authenticating with username:", username)
+            print("Authenticating with username:", username)
             user = authenticate(request, username=username, password=password)
         else:
-            print("❗ No user object to authenticate")
+            print("No user object to authenticate")
 
         if user is not None:
-            print("✅ Authentication successful")
+            print("Authentication successful")
 
             if not user.is_active:
-                print("⚠️ Account is inactive")
+                print("Account is inactive")
                 messages.error(request, "Your account is inactive. Please check your email for the activation link.")
                 return render(request, "login.html")
 
-            # ✅ Check staff approval before login
+            # Check staff approval before login
             if hasattr(user, 'staffprofile') and not user.staffprofile.is_approved:
-                print("❌ Staff account not yet approved by admin")
+                print("Staff account not yet approved by admin")
                 messages.error(request, "Your account is pending approval by the administrator.")
                 return render(request, "login.html")
 
             login(request, user)
-            print("✅ User logged in:", user.email)
+            print("User logged in:", user.email)
 
             if hasattr(user, 'studentprofile'):
-                print("🔀 Redirecting to student dashboard")
+                print("Redirecting to student dashboard")
                 return redirect('student_dashboard')
 
             elif hasattr(user, 'staffprofile'):
-                print("🔀 Redirecting to staff dashboard")
+                print("Redirecting to staff dashboard")
                 return redirect('staff_dashboard')
 
             elif user.is_superuser:
-                print("🔀 Redirecting to admin dashboard")
+                print("Redirecting to admin dashboard")
                 return redirect('/admin/')
 
             else:
-                print("❓ No profile linked to user")
+                print("No profile linked to user")
                 messages.warning(request, "Login successful but your account has no profile linked.")
                 return redirect('login')
         else:
-            print("❌ Authentication failed")
+            print("Authentication failed")
             messages.error(request, "Invalid credentials. Please try again.")
 
     return render(request, "login.html")
 
 
 @login_required
+def logout_view(request):
+    logout(request)
+    messages.success(request, "You have been logged out successfully.")
+    return redirect('login')    
+
+
+@login_required
 def student_dashboard(request):
     now = timezone.now()
-    upcoming_quizzes = Quiz.objects.filter(
+
+    active_quizzes = Quiz.objects.filter(
         is_open=True,
         visibility_to_students=True,
-        start_time__gt=now
-    ).order_by('start_time')  # Order so the soonest quiz is first
+        end_time__gt=now
+    ).order_by('start_time')
 
     quizzes = []
     announcement_quiz = None
 
-    for quiz in upcoming_quizzes:
-        time_left = quiz.start_time - now
-        urgent = time_left.total_seconds() <= 7200  
+    for quiz in active_quizzes:
+        if now >= quiz.start_time:
+            time_status = "Ongoing"
+            urgent = True  
+            days = hours = minutes = 0
+        else:
+            time_left = quiz.start_time - now
+            total_seconds = int(time_left.total_seconds())
+            days = time_left.days
+            hours = total_seconds // 3600
+            minutes = (total_seconds % 3600) // 60
+            time_status = None
+            urgent = total_seconds <= 7200  
 
-        quiz_dict = {
+        quizzes.append({
             'id': quiz.id,
             'course_code': quiz.course.code,
             'title': quiz.title,
-            'time_left': time_left,
-            'urgent': urgent,
             'start_time': quiz.start_time,
-        }
+            'days': days,
+            'hours': hours,
+            'minutes': minutes,
+            'time_status': time_status,
+            'urgent': urgent,
+        })
 
-        quizzes.append(quiz_dict)
-
-    
     if quizzes:
         announcement_quiz = quizzes[0]
 
@@ -410,6 +428,7 @@ def student_dashboard(request):
         'quizzes': quizzes,
         'announcement_quiz': announcement_quiz,
     })
+
 
 @login_required
 def staff_dashboard(request):
@@ -465,16 +484,16 @@ def create_department_admin(request):
 
 def create_quiz_view(request):
     if request.method == 'POST':
-        print("📥 POST request received for creating quiz.")
+        print("POST request received for creating quiz.")
 
         course_code = request.POST.get('course', '').strip().upper()
-        print(f"🔍 Course code received: {course_code}")
+        print(f"Course code received: {course_code}")
 
         title = request.POST.get('title', '').strip()
-        print(f"📚 Quiz title: {title}")
+        print(f"Quiz title: {title}")
 
         source_type = request.POST.get('source_bank')
-        print(f"🗃️ Source bank type: {source_type}")
+        print(f"Source bank type: {source_type}")
 
         session = request.POST.get('session')
         additional_info = request.POST.get('additional_info', '')
@@ -497,48 +516,48 @@ def create_quiz_view(request):
 
         try:
             course = Course.objects.get(code=course_code)
-            print("✅ Course found in database.")
+            print("Course found in database.")
         except Course.DoesNotExist:
-            print("❌ Course not found!")
-            messages.error(request, "❌ Course with code not found.")
+            print("Course not found!")
+            messages.error(request, "Course with code not found.")
             return render(request, 'staff_create_quiz.html')
 
         # Resolve the correct question bank
         if source_type == 'general':
             try:
                 bank = QuestionBank.objects.get(course=course, is_general=True)
-                print("✅ General bank found.")
+                print("General bank found.")
             except QuestionBank.DoesNotExist:
-                print("❌ No general bank found.")
-                messages.error(request, "❌ No general bank found for this course.")
+                print("No general bank found.")
+                messages.error(request, "No general bank found for this course.")
                 return render(request, 'staff_create_quiz.html')
         elif source_type == 'private':
             private_bank_id = request.POST.get('private_bank')
-            print(f"🔐 Private bank ID: {private_bank_id}")
+            print(f"Private bank ID: {private_bank_id}")
             try:
                 bank = QuestionBank.objects.get(id=private_bank_id, created_by=request.user, is_general=False)
-                print("✅ Private bank found.")
+                print("Private bank found.")
             except QuestionBank.DoesNotExist:
-                print("❌ Private bank not found.")
-                messages.error(request, "❌ Selected private bank not found.")
+                print("Private bank not found.")
+                messages.error(request, "Selected private bank not found.")
                 return render(request, 'staff_create_quiz.html')
         elif source_type == 'other_staff':
             staff_bank_id = request.POST.get('staff_bank')
-            print(f"👤 Staff bank ID: {staff_bank_id}")
+            print(f"Staff bank ID: {staff_bank_id}")
             try:
                 bank = QuestionBank.objects.get(id=staff_bank_id, is_general=False)
-                print("✅ Other staff bank found.")
+                print("Other staff bank found.")
             except QuestionBank.DoesNotExist:
-                print("❌ Other staff bank not found.")
-                messages.error(request, "❌ Selected staff bank not found.")
+                print("Other staff bank not found.")
+                messages.error(request, "Selected staff bank not found.")
                 return render(request, 'staff_create_quiz.html')
         else:
-            print("❌ Invalid bank type.")
-            messages.error(request, "❌ Invalid question bank type selected.")
+            print("Invalid bank type.")
+            messages.error(request, "Invalid question bank type selected.")
             return render(request, 'staff_create_quiz.html')
 
         # Create and save the quiz
-        print("💾 Creating quiz object...")
+        print("Creating quiz object...")
         quiz = Quiz(
             title=title,
             course=course,
@@ -560,13 +579,13 @@ def create_quiz_view(request):
             groups=group_string
         )
         quiz.save()
-        print(f"✅ Quiz saved with ID: {quiz.id}")
+        print(f"Quiz saved with ID: {quiz.id}")
 
-        messages.success(request, "✅ Quiz created successfully.")
+        messages.success(request, "Quiz created successfully.")
         return redirect('staff_dashboard')
 
     # GET request
-    print("🌐 GET request received - rendering quiz creation form.")
+    print("GET request received - rendering quiz creation form.")
     private_banks = QuestionBank.objects.filter(created_by=request.user, is_general=False)
     staff_banks = QuestionBank.objects.exclude(created_by=request.user).filter(is_general=False)
     courses = Course.objects.all()
@@ -665,7 +684,7 @@ def submit_quiz_view(request, attempt_id):
     attempt.submitted_at = timezone.now()
     attempt.save()
 
-    messages.success(request, f"✅ Quiz submitted successfully! Score: {percentage:.2f}%")
+    messages.success(request, f"Quiz submitted successfully! Score: {percentage:.2f}%")
     return redirect('quiz_result', attempt_id=attempt.id)
 # views.py
 def resume_quiz_view(request, attempt_id):
@@ -676,14 +695,19 @@ def resume_quiz_view(request, attempt_id):
 def quiz_instructions_view(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id)
 
-    # Check that quiz is open and within date range
     now = timezone.now()
     if not quiz.is_open or now < quiz.start_time or now > quiz.end_time:
         messages.error(request, "This quiz is not available at the moment.")
         return redirect('student_dashboard')
 
-    # If student already completed all attempts, block them
-    attempts = QuizAttempt.objects.filter(student=request.user, quiz=quiz).count()
+    try:
+        student_profile = request.user.studentprofile
+    except StudentProfile.DoesNotExist:
+        messages.error(request, "Student profile not found.")
+        return redirect('student_dashboard')
+
+    # Use the StudentProfile to check attempts
+    attempts = QuizAttempt.objects.filter(student=student_profile, quiz=quiz).count()
     if attempts >= quiz.allowed_attempts:
         messages.warning(request, "You have already used all allowed attempts.")
         return redirect('student_dashboard')
@@ -696,31 +720,34 @@ def quiz_instructions_view(request, quiz_id):
     return render(request, 'take_quiz.html', context)
 
 
-
 @require_POST
 @login_required
 def start_quiz_view(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id)
 
-    # Same availability checks
     now = timezone.now()
     if not quiz.is_open or now < quiz.start_time or now > quiz.end_time:
         messages.error(request, "Quiz is not available.")
         return redirect('student_dashboard')
 
+    # Get the student's profile
+    try:
+        student_profile = request.user.studentprofile
+    except StudentProfile.DoesNotExist:
+        messages.error(request, "Student profile not found.")
+        return redirect('student_dashboard')
+
     # Check attempts
-    attempts = QuizAttempt.objects.filter(student=request.user, quiz=quiz).count()
+    attempts = QuizAttempt.objects.filter(student=student_profile, quiz=quiz).count()
     if attempts >= quiz.allowed_attempts:
         messages.error(request, "All attempts used.")
         return redirect('student_dashboard')
 
     # Create new attempt
     attempt = QuizAttempt.objects.create(
-        student=request.user,
+        student=student_profile,
         quiz=quiz,
         started_at=now
     )
-    
+
     return redirect('take_quiz', attempt_id=attempt.id)
-
-

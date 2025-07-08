@@ -451,8 +451,8 @@
             <a href="#" class="navbar-brand">Student Portal</a>
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
             <div class="navbar-menu" id="navbarMenu">
-                <a href="#" class="navbar-link">Dashboard</a>
-                <a href="{% url 'quiz_list' %}" class="navbar-link">All Quizzes</a>
+                <a href="{% url 'student_dashboard' %}" class="navbar-link">Dashboard</a>
+                <a href="#" class="navbar-link">All Quizzes</a>
                 <a href="#" class="navbar-link">Results</a>
                 <a href="#" class="navbar-link">Profile</a>
                 <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
@@ -512,14 +512,18 @@
                                 <td>{{ quiz.course_code }}</td>
                                 <td>{{ quiz.title }}</td>
                                 <td class="{% if quiz.urgent %}time-urgent{% else %}time-normal{% endif %}">
-                                    {% if quiz.time_left.days > 0 %}
-                                        {{ quiz.time_left.days }} day{{ quiz.time_left.days|pluralize }}
-                                    {% elif quiz.time_left.seconds >= 3600 %}
-                                        {{ quiz.time_left.seconds|divisibleby:3600 }} hour{{ quiz.time_left.seconds|divisibleby:3600|pluralize }}
+                                    {% if quiz.time_status %}
+                                        {{ quiz.time_status }}
+                                    {% elif quiz.days > 0 %}
+                                        {{ quiz.days }} day{{ quiz.days|pluralize }}
+                                    {% elif quiz.hours > 0 %}
+                                        {{ quiz.hours }} hour{{ quiz.hours|pluralize }}
                                     {% else %}
-                                        {{ quiz.time_left.seconds|divisibleby:60 }} minute{{ quiz.time_left.seconds|divisibleby:60|pluralize }}
+                                        {{ quiz.minutes }} minute{{ quiz.minutes|pluralize }}
                                     {% endif %}
                                 </td>
+
+
                                 <td>
                                     {% if quiz.id %}
                                         <a href="{% url 'quiz_instructions' quiz.id %}" class="view-btn">Take View</a>
@@ -536,7 +540,7 @@
 
                     {% if quizzes|length > 3 %}
                     <div class="see-all-link">
-                        <a href="{% url 'quiz_list' %}">See All Quizzes</a>
+                        <a href="#">See All Quizzes</a>
                     </div>
                     {% endif %}
                 </div>

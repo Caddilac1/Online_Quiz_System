@@ -29,7 +29,7 @@ def create_and_share_sheet(sheet_title):
         return spreadsheet.url
 
     except Exception as e:
-        print(f"❌ Error creating or sharing sheet: {e}")
+        print(f"Error creating or sharing sheet: {e}")
         return None
 
 
@@ -65,11 +65,11 @@ def import_questions_from_sheet(sheet_id, course, created_by):
                 )
                 imported_count += 1
             except Exception as e:
-                print(f"⚠️ Could not import row: {row} | Error: {e}")
+                print(f"Could not import row: {row} | Error: {e}")
                 continue
 
         return imported_count
 
     except Exception as e:
-        print(f"❌ Error importing questions from sheet: {e}")
+        print(f"Error importing questions from sheet: {e}")
         return 0

@@ -260,15 +260,19 @@ class Quiz(models.Model):
 # STUDENT ATTEMPT & ANSWERS
 # ==============================
 
+from django.utils import timezone
+
 class QuizAttempt(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE)
     score = models.FloatField(null=True, blank=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
     is_completed = models.BooleanField(default=False)
+    started_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"{self.student.user.username} - {self.quiz.title}"
+
 
 class StudentAnswer(models.Model):
     attempt = models.ForeignKey(QuizAttempt, on_delete=models.CASCADE, related_name='answers')

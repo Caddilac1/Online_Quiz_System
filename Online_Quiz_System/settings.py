@@ -26,6 +26,11 @@ SECRET_KEY = env("SECRET_KEY")
 
 GOOGLE_SHEET_CREDENTIALS = os.path.join(BASE_DIR, 'sheet_credentials.json')
 
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
